@@ -75,7 +75,7 @@ async function spreddFetch<T>(path: string, options?: RequestInit): Promise<T | 
 }
 
 export async function getTrendingMarkets(): Promise<Market[]> {
-  const platforms = ['polymarket', 'limitless'];
+  const platforms = ['polymarket', 'limitless', 'kalshi'];
   const results = await Promise.all(
     platforms.map((p) =>
       spreddFetch<SpreddMarket[]>(`/v1/markets?platform=${p}&limit=15`)
