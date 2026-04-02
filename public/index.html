@@ -1333,10 +1333,11 @@
   <h2>Get there <em>before</em>.</h2>
   <p>Join the waitlist for early access to Before. Be the first to know what's about to matter.</p>
   <div class="cta-form">
-    <input type="email" class="cta-input" placeholder="your@email.com">
-    <button class="btn-primary" onclick="handleSignup()">Join Waitlist</button>
+    <input type="email" class="cta-input" id="waitlist-email" placeholder="your@email.com">
+    <button class="btn-primary" id="waitlist-btn" onclick="handleSignup()">Join Waitlist</button>
   </div>
-  <p id="confirm-msg" style="display:none;">Signal received. You're on the list.</p>
+  <p id="confirm-msg" style="display:none; color: var(--accent); margin-top: 16px;">Signal received. You're on the list.</p>
+  <p id="error-msg" style="display:none; color: var(--warm); margin-top: 16px;"></p>
   <div class="cta-note">Built on Spredd. Designed for everyone.</div>
 
 </section>
@@ -1351,13 +1352,50 @@
 </footer>
 
 <script>
-function handleSignup() {
-  const input = document.querySelector('.cta-input');
-  const msg = document.getElementById('confirm-msg');
-  if (input.value && input.value.includes('@')) {
-    msg.style.display = 'block';
-    input.value = '';
+async function handleSignup() {
+  const input = document.getElementById('waitlist-email');
+  const btn = document.getElementById('waitlist-btn');
+  const confirmMsg = document.getElementById('confirm-msg');
+  const errorMsg = document.getElementById('error-msg');
+  const email = input.value.trim();
+
+  confirmMsg.style.display = 'none';
+  errorMsg.style.display = 'none';
+
+  if (!email || !email.includes('@') || !email.includes('.')) {
+    errorMsg.textContent = 'Enter a valid email address.';
+    errorMsg.style.display = 'block';
+    return;
   }
+
+  btn.disabled = true;
+  btn.textContent = 'Joining...';
+
+  try {
+    const res = await fetch('/api/waitlist', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email })
+    });
+    const data = await res.json();
+
+    if (res.ok) {
+      confirmMsg.textContent = data.message === 'Already on the waitlist'
+        ? 'You\'re already on the list. We\'ll be in touch.'
+        : 'Signal received. You\'re on the list.';
+      confirmMsg.style.display = 'block';
+      input.value = '';
+    } else {
+      errorMsg.textContent = data.error || 'Something went wrong. Try again.';
+      errorMsg.style.display = 'block';
+    }
+  } catch {
+    errorMsg.textContent = 'Network error. Try again.';
+    errorMsg.style.display = 'block';
+  }
+
+  btn.disabled = false;
+  btn.textContent = 'Join Waitlist';
 }
 
 document.querySelectorAll('a[href^="#"]').forEach(a => {
