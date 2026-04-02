@@ -1,0 +1,64 @@
+import type { Metadata } from 'next';
+import Link from 'next/link';
+import './globals.css';
+
+export const metadata: Metadata = {
+  title: 'B4E — Know Before It Matters',
+  description: 'AI-powered market intelligence for prediction markets. Real-time context, discovery, and insights.',
+  openGraph: {
+    title: 'B4E — Know Before It Matters',
+    description: 'AI-powered market intelligence for prediction markets.',
+    siteName: 'B4E',
+  },
+};
+
+export default function RootLayout({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
+  return (
+    <html lang="en">
+      <body>
+        {/* Nav */}
+        <nav className="fixed top-0 left-0 right-0 z-50 px-6 py-4 flex justify-between items-center backdrop-blur-xl bg-b4e-bg/85 border-b border-b4e-border">
+          <Link
+            href="/"
+            className="font-mono font-bold text-lg tracking-[5px] text-b4e-accent no-underline"
+          >
+            B4E
+          </Link>
+          <div className="flex items-center gap-6">
+            <Link
+              href="/"
+              className="font-mono text-[10px] tracking-[2px] uppercase text-b4e-text-muted hover:text-b4e-text-dim transition-colors no-underline"
+            >
+              Markets
+            </Link>
+            <span className="font-mono text-[10px] tracking-[2px] uppercase text-b4e-text-muted">
+              About
+            </span>
+          </div>
+        </nav>
+
+        {/* Main content */}
+        <main className="pt-[72px] min-h-screen">{children}</main>
+
+        {/* Footer */}
+        <footer className="px-6 py-8 border-t border-b4e-border flex justify-between items-center">
+          <span className="font-mono text-[11px] text-b4e-text-muted tracking-wide">
+            &copy; 2026 B4E
+          </span>
+          <a
+            href="https://x.com/b4e"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="font-mono text-[11px] text-b4e-text-muted tracking-wide hover:text-b4e-text no-underline transition-colors"
+          >
+            @b4e
+          </a>
+        </footer>
+      </body>
+    </html>
+  );
+}
