@@ -20,7 +20,7 @@ export default async function HomePage() {
           Trending Markets
         </h1>
         <p className="text-b4e-text-dim text-[16px] max-w-xl leading-relaxed">
-          High-volume prediction markets across Polymarket and Limitless.
+          High-volume prediction markets across Polymarket, Limitless, and Kalshi.
           Click any market for an AI-generated context brief.
         </p>
       </div>
