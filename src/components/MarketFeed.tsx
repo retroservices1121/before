@@ -4,14 +4,33 @@ import { useState } from 'react';
 import { Market } from '@/lib/types';
 import MarketCard from './MarketCard';
 
-const CATEGORIES = ['All', 'Economics', 'Politics', 'Crypto', 'Technology', 'Markets'] as const;
+const CATEGORIES = ['All', 'Politics', 'Crypto', 'Sports', 'Geopolitics', 'Economy'] as const;
+
+const CATEGORY_MAP: Record<string, string> = {
+  politics: 'Politics', trump: 'Politics', elections: 'Politics',
+  'world elections': 'Politics', 'global elections': 'Politics',
+  'trump presidency': 'Politics', canada: 'Politics',
+  crypto: 'Crypto', bitcoin: 'Crypto', airdrops: 'Crypto',
+  sports: 'Sports', soccer: 'Sports', tennis: 'Sports',
+  esports: 'Sports', ncaa: 'Sports', 'formula 1': 'Sports', chess: 'Sports',
+  geopolitics: 'Geopolitics', iran: 'Geopolitics', israel: 'Geopolitics',
+  gaza: 'Geopolitics', 'middle east': 'Geopolitics', 'foreign policy': 'Geopolitics',
+  'ukraine peace deal': 'Geopolitics', 'strait of hormuz': 'Geopolitics',
+  economy: 'Economy', 'economic policy': 'Economy', business: 'Economy',
+  'comex gold futures': 'Economy',
+};
+
+function getBucket(category?: string): string {
+  if (!category) return 'Other';
+  return CATEGORY_MAP[category.toLowerCase()] || 'Other';
+}
 
 export default function MarketFeed({ markets }: { markets: Market[] }) {
   const [active, setActive] = useState<string>('All');
 
   const filtered = active === 'All'
     ? markets
-    : markets.filter((m) => m.category?.toLowerCase() === active.toLowerCase());
+    : markets.filter((m) => getBucket(m.category) === active);
 
   return (
     <>

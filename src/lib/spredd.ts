@@ -75,12 +75,20 @@ async function spreddFetch<T>(path: string, options?: RequestInit): Promise<T | 
 }
 
 export async function getTrendingMarkets(): Promise<Market[]> {
-  const data = await spreddFetch<SpreddMarket[]>(
-    '/v1/markets?sort=volume&order=desc&limit=20&active=true'
+  const platforms = ['polymarket', 'limitless'];
+  const results = await Promise.all(
+    platforms.map((p) =>
+      spreddFetch<SpreddMarket[]>(`/v1/markets?platform=${p}&limit=15`)
+    )
   );
 
-  if (data && Array.isArray(data)) {
-    return data.map(mapSpreddMarket);
+  const all = results.flatMap((r) => (Array.isArray(r) ? r : []));
+
+  if (all.length > 0) {
+    return all
+      .map(mapSpreddMarket)
+      .sort((a, b) => b.volume - a.volume)
+      .slice(0, 20);
   }
 
   console.log('Using mock market data (Spredd API not available)');
