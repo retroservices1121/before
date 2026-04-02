@@ -1,17 +1,14 @@
 /**
  * TinyFish Web Agent API client
- * 
- * Uses TinyFish's Web Agent to crawl real-time news and data
- * related to prediction markets. This feeds into the AI context
+ *
+ * Uses TinyFish's browser automation to crawl real-time news
+ * related to prediction markets. Feeds into the AI context
  * brief generation pipeline.
- * 
- * Docs: https://docs.mino.ai/
- * 
- * TODO: Update the endpoint and auth method once you have
- * your accelerator API credits.
+ *
+ * Docs: https://docs.tinyfish.ai/
  */
 
-const TINYFISH_API_URL = process.env.TINYFISH_API_URL || 'https://api.tinyfish.ai';
+const TINYFISH_API_URL = process.env.TINYFISH_API_URL || 'https://agent.tinyfish.ai/v1';
 const TINYFISH_API_KEY = process.env.TINYFISH_API_KEY || '';
 
 export interface WebAgentResult {
@@ -31,32 +28,28 @@ export interface MarketWebContext {
 /**
  * Dispatch a TinyFish Web Agent to crawl relevant context
  * for a given prediction market.
- * 
- * The agent searches for recent news, data, and analysis
- * related to the market topic, then returns structured results.
  */
 export async function crawlMarketContext(
   marketTitle: string,
   category?: string
 ): Promise<MarketWebContext> {
-  // Build a targeted search query from the market title
   const query = buildSearchQuery(marketTitle, category);
 
+  if (!TINYFISH_API_KEY) {
+    return fallbackContext(query);
+  }
+
   try {
-    const response = await fetch(`${TINYFISH_API_URL}/v1/agent/browse`, {
+    const response = await fetch(`${TINYFISH_API_URL}/automation/run-sse`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'Authorization': `Bearer ${TINYFISH_API_KEY}`,
+        'X-API-Key': TINYFISH_API_KEY,
       },
       body: JSON.stringify({
-        task: `Search for the latest news and analysis about: "${marketTitle}". 
-               Find 3-5 recent, high-quality articles from reputable sources.
-               For each article, extract the title, URL, publication date, 
-               and a 2-3 sentence summary of the key information relevant 
-               to this prediction market topic.`,
-        query,
-        max_results: 5,
+        url: `https://news.google.com/search?q=${encodeURIComponent(query)}`,
+        goal: `Find the 5 most recent and relevant news articles about: "${marketTitle}". For each article, extract: the headline/title, the source URL, the publication date, and a 2-3 sentence summary of the key information. Return as a JSON array with fields: title, url, published_at, summary, source.`,
+        browser_profile: 'lite',
       }),
     });
 
@@ -65,10 +58,10 @@ export async function crawlMarketContext(
       return fallbackContext(query);
     }
 
-    const data = await response.json();
+    const articles = await parseSSEResponse(response);
 
     return {
-      articles: parseAgentResults(data),
+      articles,
       crawledAt: new Date().toISOString(),
       query,
     };
@@ -79,11 +72,64 @@ export async function crawlMarketContext(
 }
 
 /**
+ * Parse SSE stream from TinyFish and extract article results.
+ */
+async function parseSSEResponse(response: Response): Promise<WebAgentResult[]> {
+  const text = await response.text();
+
+  // SSE events are separated by double newlines, data lines start with "data: "
+  const events = text
+    .split('\n')
+    .filter((line) => line.startsWith('data: '))
+    .map((line) => {
+      try {
+        return JSON.parse(line.slice(6));
+      } catch {
+        return null;
+      }
+    })
+    .filter(Boolean);
+
+  // Find the COMPLETE event with results
+  const complete = events.find(
+    (e: any) => e.type === 'COMPLETE' || e.status === 'COMPLETED'
+  );
+
+  if (!complete?.result) return [];
+
+  // TinyFish returns result as { result: "...json string..." }
+  // or sometimes as a direct object/array
+  let results: any[] = [];
+
+  const raw = complete.result.result || complete.result;
+
+  if (typeof raw === 'string') {
+    // Extract JSON array from markdown code blocks or raw string
+    const jsonMatch = raw.match(/\[[\s\S]*\]/);
+    if (jsonMatch) {
+      try {
+        results = JSON.parse(jsonMatch[0]);
+      } catch {
+        return [];
+      }
+    }
+  } else if (Array.isArray(raw)) {
+    results = raw;
+  }
+
+  return results.map((r: any) => ({
+    url: r.url || '',
+    title: r.title || r.headline || '',
+    content: r.summary || r.content || '',
+    publishedAt: r.published_at || r.publishedAt || r.date || undefined,
+    source: r.source || extractDomain(r.url),
+  }));
+}
+
+/**
  * Build an effective search query from a market title.
- * Strips common prediction market phrasing to get the core topic.
  */
 function buildSearchQuery(title: string, category?: string): string {
-  // Remove common PM framing words
   const cleaned = title
     .replace(/^will\s+/i, '')
     .replace(/\s+by\s+(end\s+of\s+)?\d{4}$/i, '')
@@ -91,39 +137,7 @@ function buildSearchQuery(title: string, category?: string): string {
     .replace(/\s+in\s+\d{4}$/i, '');
 
   const categoryHint = category ? ` ${category}` : '';
-  return `${cleaned}${categoryHint} latest news 2026`;
-}
-
-/**
- * Parse TinyFish agent response into structured results.
- * 
- * TODO: Update this parser to match the actual TinyFish 
- * Web Agent response format once you have API access.
- */
-function parseAgentResults(data: any): WebAgentResult[] {
-  // Adapt this based on actual TinyFish response structure
-  if (Array.isArray(data?.results)) {
-    return data.results.map((r: any) => ({
-      url: r.url || '',
-      title: r.title || '',
-      content: r.content || r.summary || '',
-      publishedAt: r.published_at || r.publishedAt || undefined,
-      source: r.source || extractDomain(r.url),
-    }));
-  }
-
-  // If response is a single text block, return as-is
-  if (data?.text || data?.content) {
-    return [
-      {
-        url: '',
-        title: 'Web Research',
-        content: data.text || data.content,
-      },
-    ];
-  }
-
-  return [];
+  return `${cleaned}${categoryHint} latest news`;
 }
 
 function extractDomain(url: string): string {
@@ -134,11 +148,6 @@ function extractDomain(url: string): string {
   }
 }
 
-/**
- * Fallback when TinyFish API is unavailable.
- * Returns empty results so the context brief can still
- * generate from Claude's knowledge alone.
- */
 function fallbackContext(query: string): MarketWebContext {
   console.log('Using fallback context (TinyFish API not available)');
   return {
