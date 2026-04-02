@@ -32,7 +32,7 @@ export async function generateContextBrief(market: Market): Promise<ContextBrief
     : '';
 
   // Step 3: Gemini synthesizes everything
-  const prompt = `You are B4E, an AI market intelligence engine for prediction markets. Generate a context brief for this market.
+  const prompt = `You are Before, an AI market intelligence engine for prediction markets. Generate a context brief for this market.
 
 Market: ${market.title}
 Description: ${market.description || 'N/A'}

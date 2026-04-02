@@ -149,7 +149,7 @@ export default async function MarketPage({ params }: PageProps) {
         <div className="flex items-center gap-2 mb-4">
           <span className="w-1.5 h-1.5 rounded-full bg-b4e-accent pulse-dot shadow-[0_0_6px_rgba(0,229,159,0.5)]" />
           <span className="font-mono text-[10px] tracking-[3px] uppercase text-b4e-accent">
-            B4E Intelligence Brief
+            Before Intelligence Brief
           </span>
         </div>
         <ContextBriefComponent brief={brief} />

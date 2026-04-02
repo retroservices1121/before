@@ -3,12 +3,12 @@ import Link from 'next/link';
 import './globals.css';
 
 export const metadata: Metadata = {
-  title: 'B4E — Know Before It Matters',
+  title: 'Before — Know Before It Matters',
   description: 'AI-powered market intelligence for prediction markets. Real-time context, discovery, and insights.',
   openGraph: {
-    title: 'B4E — Know Before It Matters',
+    title: 'Before — Know Before It Matters',
     description: 'AI-powered market intelligence for prediction markets.',
-    siteName: 'B4E',
+    siteName: 'Before',
   },
 };
 
@@ -24,9 +24,9 @@ export default function RootLayout({
         <nav className="fixed top-0 left-0 right-0 z-50 px-6 py-4 flex justify-between items-center backdrop-blur-xl bg-b4e-bg/85 border-b border-b4e-border">
           <Link
             href="/"
-            className="font-mono font-bold text-lg tracking-[5px] text-b4e-accent no-underline"
+            className="font-serif italic text-lg tracking-[3px] text-b4e-accent no-underline"
           >
-            B4E
+            before
           </Link>
           <div className="flex items-center gap-6">
             <Link
@@ -47,7 +47,7 @@ export default function RootLayout({
         {/* Footer */}
         <footer className="px-6 py-8 border-t border-b4e-border flex justify-between items-center">
           <span className="font-mono text-[11px] text-b4e-text-muted tracking-wide">
-            &copy; 2026 B4E
+            &copy; 2026 <span className="font-serif italic text-b4e-text-dim">before</span>
           </span>
           <a
             href="https://x.com/b4e"
