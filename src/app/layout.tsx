@@ -30,7 +30,7 @@ export default function RootLayout({
           </Link>
           <div className="flex items-center gap-6">
             <Link
-              href="/"
+              href="/markets"
               className="font-mono text-[10px] tracking-[2px] uppercase text-b4e-text-muted hover:text-b4e-text-dim transition-colors no-underline"
             >
               Markets
