@@ -1,26 +1,65 @@
-import { Market, SpreddMarketsResponse } from './types';
+import { Market } from './types';
+import { slugify } from './utils';
 
-const SPREDD_API_URL = process.env.SPREDD_API_URL || 'https://api.spredd.com';
+const SPREDD_API_URL = process.env.SPREDD_API_URL || 'https://api.spreddterminal.com';
 const SPREDD_API_KEY = process.env.SPREDD_API_KEY || '';
 
-/**
- * Spredd API client
- * 
- * Update the endpoint paths below to match your actual Spredd API.
- * The client falls back to mock data when the API is unreachable,
- * so you can develop the UI before the API is fully wired.
- */
+// Spredd API response types
+interface SpreddMarket {
+  platform: string;
+  market_id: string;
+  title: string;
+  description?: string;
+  category?: string;
+  yes_price: number;
+  no_price?: number;
+  volume: number;
+  volume_24h?: number;
+  liquidity?: number;
+  end_date?: string;
+  is_active?: boolean;
+  chain?: string;
+  collateral_token?: string;
+  outcomes?: Record<string, number>;
+  url?: string;
+}
+
+function mapSpreddMarket(s: SpreddMarket): Market {
+  return {
+    id: `${s.platform}-${s.market_id}`,
+    slug: slugify(s.title),
+    title: s.title,
+    description: s.description,
+    probability: s.yes_price,
+    volume: s.volume,
+    volume24h: s.volume_24h,
+    platform: normalizePlatform(s.platform),
+    category: s.category,
+    endDate: s.end_date,
+    url: s.url,
+  };
+}
+
+function normalizePlatform(p: string): Market['platform'] {
+  const lower = p.toLowerCase();
+  if (lower === 'polymarket') return 'polymarket';
+  if (lower === 'limitless') return 'limitless';
+  if (lower === 'kalshi') return 'kalshi';
+  return 'aggregate';
+}
 
 async function spreddFetch<T>(path: string, options?: RequestInit): Promise<T | null> {
+  if (!SPREDD_API_KEY) return null;
+
   try {
     const res = await fetch(`${SPREDD_API_URL}${path}`, {
       ...options,
       headers: {
         'Content-Type': 'application/json',
-        ...(SPREDD_API_KEY && { Authorization: `Bearer ${SPREDD_API_KEY}` }),
+        'X-API-Key': SPREDD_API_KEY,
         ...options?.headers,
       },
-      next: { revalidate: 60 }, // Cache for 60s
+      next: { revalidate: 60 },
     });
 
     if (!res.ok) {
@@ -35,44 +74,41 @@ async function spreddFetch<T>(path: string, options?: RequestInit): Promise<T | 
   }
 }
 
-/**
- * Fetch trending / high-volume markets
- * 
- * TODO: Update this endpoint to match your Spredd API.
- * Possible endpoints:
- *   /v1/markets?sort=volume&limit=20
- *   /v1/markets/trending
- *   /v1/aggregated/markets?orderBy=volume24h
- */
 export async function getTrendingMarkets(): Promise<Market[]> {
-  const data = await spreddFetch<SpreddMarketsResponse>(
-    '/v1/markets?sort=volume&order=desc&limit=20'
+  const data = await spreddFetch<SpreddMarket[]>(
+    '/v1/markets?sort=volume&order=desc&limit=20&active=true'
   );
 
-  if (data?.markets) {
-    return data.markets;
+  if (data && Array.isArray(data)) {
+    return data.map(mapSpreddMarket);
   }
 
-  // Fallback to mock data for development
   console.log('Using mock market data (Spredd API not available)');
   return getMockMarkets();
 }
 
-/**
- * Fetch a single market by slug or ID
- * 
- * TODO: Update endpoint to match your Spredd API.
- */
 export async function getMarket(slug: string): Promise<Market | null> {
-  const data = await spreddFetch<Market>(`/v1/markets/${slug}`);
+  // Search Spredd API by title keywords derived from slug
+  const searchTerm = slug.replace(/-/g, ' ');
+  const data = await spreddFetch<SpreddMarket[]>(
+    `/v1/markets?search=${encodeURIComponent(searchTerm)}&limit=5`
+  );
 
-  if (data) {
-    return data;
+  if (data && Array.isArray(data)) {
+    const mapped = data.map(mapSpreddMarket);
+    const match = mapped.find((m) => m.slug === slug) || mapped[0];
+    if (match) return match;
   }
 
   // Fallback to mock
   const mocks = getMockMarkets();
   return mocks.find((m) => m.slug === slug) || null;
+}
+
+export async function getMarketNews(platform: string, marketId: string) {
+  return spreddFetch<{ title: string; url: string; source: string }[]>(
+    `/v1/news/market/${platform}/${marketId}`
+  );
 }
 
 // ─── Mock data for development ───────────────────────────────────
