@@ -192,7 +192,7 @@ async function searchAsset(title: string): Promise<string | null> {
     `/v1/assets/search?q=${encodeURIComponent(cryptoWord)}&limit=1`
   );
 
-  return data?.assets?.[0]?.assetId || null;
+  return data?.results?.[0]?.assetId || null;
 }
 
 /**
@@ -210,28 +210,28 @@ async function enrichByAssetId(assetId: string): Promise<CryptoEnrichment> {
   let asset: TokenAsset | null = null;
   if (assetData?.asset) {
     const a = assetData.asset;
-    const profile = assetData.includes?.profile?.data;
-    const markets = assetData.includes?.markets?.data;
+    const stats = a.stats || {};
 
     asset = {
       assetId: a.assetId,
-      name: a.name || profile?.name,
-      symbol: a.symbol || profile?.symbol,
-      price: markets?.price || profile?.price,
-      priceChange24h: markets?.priceChange24h,
-      priceChange7d: markets?.priceChange7d,
-      marketCap: markets?.marketCap || profile?.marketCap,
-      volume24h: markets?.volume24h,
+      name: a.name,
+      symbol: a.symbol,
+      price: stats.price,
+      priceChange24h: stats.priceChange24hPercent,
+      priceChange7d: stats.priceChange7dPercent,
+      marketCap: stats.marketCap,
+      volume24h: stats.volume24hUSD,
     };
   }
 
   // Parse risk data
   let risk: TokenRisk | null = null;
-  if (riskData) {
+  if (riskData?.risk?.ok && riskData.risk.marketScore) {
+    const ms = riskData.risk.marketScore;
     risk = {
-      score: riskData.score || riskData.riskScore,
-      level: riskData.level || riskData.riskLevel,
-      details: riskData.summary || riskData.details,
+      score: String(ms.score),
+      level: ms.label || ms.grade,
+      details: `Grade ${ms.grade}, tone: ${ms.tone}`,
     };
   }
 
@@ -241,7 +241,7 @@ async function enrichByAssetId(assetId: string): Promise<CryptoEnrichment> {
     ohlcv = {
       interval: '1D',
       candles: ohlcvData.candles.map((c: any) => ({
-        timestamp: c.timestamp || c.t,
+        timestamp: c.time || c.timestamp || c.t,
         open: c.open || c.o,
         high: c.high || c.h,
         low: c.low || c.l,
