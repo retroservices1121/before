@@ -78,7 +78,7 @@ export async function getTrendingMarkets(): Promise<Market[]> {
   const platforms = ['polymarket', 'limitless', 'kalshi'];
   const results = await Promise.all(
     platforms.map((p) =>
-      spreddFetch<SpreddMarket[]>(`/v1/markets?platform=${p}&limit=15`)
+      spreddFetch<SpreddMarket[]>(`/v1/markets?platform=${p}&limit=15&min_price=0.05`)
     )
   );
 
