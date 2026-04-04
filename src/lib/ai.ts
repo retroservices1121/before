@@ -1,5 +1,6 @@
 import { Market, ContextBrief } from './types';
 import { crawlMarketContext } from './tinyfish';
+import { getSpreadContext, formatSpreadForPrompt } from './spread';
 import { enrichCryptoMarket, formatEnrichmentForPrompt } from './tokens';
 
 const GEMINI_API_KEY = process.env.GEMINI_API_KEY || '';
@@ -15,17 +16,25 @@ const GEMINI_API_URL = `https://generativelanguage.googleapis.com/v1beta/models/
  * 3. Gemini synthesizes all data sources into a structured brief
  */
 export async function generateContextBrief(market: Market): Promise<ContextBrief> {
-  // Step 1 + 2: Fetch web context and crypto data in parallel
-  const [webContext, cryptoEnrichment] = await Promise.all([
-    crawlMarketContext(market.title, market.category),
+  // Step 1 + 2: Fetch news context and crypto data in parallel
+  const isPolymarket = market.platform === 'polymarket' && market.conditionId;
+
+  const [spreadContext, webContext, cryptoEnrichment] = await Promise.all([
+    isPolymarket ? getSpreadContext(market.conditionId!) : Promise.resolve(null),
+    !isPolymarket ? crawlMarketContext(market.title, market.category) : Promise.resolve(null),
     enrichCryptoMarket(market.title, market.category),
   ]);
 
-  const webContextBlock = webContext.articles.length > 0
+  // Use Spread correlated news for Polymarket, TinyFish for others
+  const spreadBlock = spreadContext ? formatSpreadForPrompt(spreadContext) : '';
+  const webContextBlock = webContext && webContext.articles.length > 0
     ? `\n\nREAL-TIME WEB CONTEXT (crawled ${webContext.crawledAt}):\n${webContext.articles
         .map((a, i) => `[${i + 1}] ${a.title}${a.source ? ` (${a.source})` : ''}${a.publishedAt ? ` — ${a.publishedAt}` : ''}\n${a.content}`)
         .join('\n\n')}`
-    : '\n\n(No live web context available — generate brief from your knowledge of this topic.)';
+    : '';
+
+  const newsBlock = spreadBlock || webContextBlock
+    || '\n\n(No live web context available — generate brief from your knowledge of this topic.)';
 
   const cryptoBlock = cryptoEnrichment
     ? `\n\n${formatEnrichmentForPrompt(cryptoEnrichment)}`
@@ -42,7 +51,7 @@ Current probability: ${(market.probability * 100).toFixed(1)}%
 Total volume: $${market.volume.toLocaleString()}
 Platform: ${market.platform}
 Resolution date: ${market.endDate || 'TBD'}
-Category: ${market.category || 'General'}${webContextBlock}${cryptoBlock}
+Category: ${market.category || 'General'}${newsBlock}${cryptoBlock}
 
 Respond with ONLY valid JSON (no markdown, no backticks) in this exact format:
 {

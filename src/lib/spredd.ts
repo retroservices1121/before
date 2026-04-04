@@ -37,6 +37,7 @@ function mapSpreddMarket(s: SpreddMarket): Market {
     category: s.category,
     endDate: s.end_date,
     url: s.url,
+    conditionId: s.platform === 'polymarket' ? s.market_id : undefined,
   };
 }
 

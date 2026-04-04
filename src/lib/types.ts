@@ -12,6 +12,7 @@ export interface Market {
   endDate?: string;
   imageUrl?: string;
   url?: string;
+  conditionId?: string;
   createdAt?: string;
   updatedAt?: string;
 }
