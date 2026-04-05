@@ -52,13 +52,13 @@ export interface CryptoEnrichment {
 
 // Keywords that indicate a market is crypto-related
 const CRYPTO_KEYWORDS = [
-  'bitcoin', 'btc', 'ethereum', 'eth', 'solana', 'sol',
-  'crypto', 'token', 'defi', 'nft', 'blockchain', 'web3',
+  'bitcoin', 'btc', 'ethereum', 'eth', 'solana',
+  'crypto', 'defi', 'nft', 'blockchain', 'web3',
   'stablecoin', 'usdc', 'usdt', 'dogecoin', 'doge', 'xrp',
-  'ripple', 'cardano', 'ada', 'avalanche', 'avax', 'polygon',
-  'matic', 'chainlink', 'link', 'uniswap', 'aave', 'bnb',
-  'litecoin', 'ltc', 'polkadot', 'dot', 'near', 'cosmos',
-  'atom', 'arbitrum', 'optimism', 'base', 'sui', 'aptos',
+  'ripple', 'cardano', 'avalanche', 'avax', 'polygon',
+  'matic', 'chainlink', 'uniswap', 'aave', 'bnb',
+  'litecoin', 'ltc', 'polkadot', 'cosmos',
+  'arbitrum', 'sui', 'aptos',
   'meme coin', 'memecoin',
 ];
 
