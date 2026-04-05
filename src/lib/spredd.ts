@@ -27,7 +27,7 @@ interface SpreddMarket {
 function mapSpreddMarket(s: SpreddMarket): Market {
   return {
     id: `${s.platform}-${s.market_id}`,
-    slug: slugify(s.title),
+    slug: `${slugify(s.title)}--${s.platform}--${encodeURIComponent(s.market_id)}`,
     title: s.title,
     description: s.description,
     probability: s.yes_price,
@@ -97,21 +97,34 @@ export async function getTrendingMarkets(): Promise<Market[]> {
 }
 
 export async function getMarket(slug: string): Promise<Market | null> {
-  // Search Spredd API by title keywords derived from slug
-  const searchTerm = slug.replace(/-/g, ' ');
-  const data = await spreddFetch<SpreddMarket[]>(
+  // Slug format: {title-slug}--{platform}--{encoded-market-id}
+  const parts = slug.split('--');
+
+  if (parts.length === 3) {
+    const platform = parts[1];
+    const marketId = decodeURIComponent(parts[2]);
+    const data = await spreddFetch<SpreddMarket>(
+      `/v1/markets/${platform}/${encodeURIComponent(marketId)}`
+    );
+    if (data && data.market_id) {
+      return mapSpreddMarket(data);
+    }
+  }
+
+  // Fallback: search by title keywords (for old-format slugs / mock data)
+  const searchTerm = (parts[0] || slug).replace(/-/g, ' ');
+  const searchData = await spreddFetch<SpreddMarket[]>(
     `/v1/markets?search=${encodeURIComponent(searchTerm)}&limit=5`
   );
 
-  if (data && Array.isArray(data)) {
-    const mapped = data.map(mapSpreddMarket);
-    const match = mapped.find((m) => m.slug === slug) || mapped[0];
-    if (match) return match;
+  if (searchData && Array.isArray(searchData)) {
+    const mapped = searchData.map(mapSpreddMarket);
+    if (mapped.length > 0) return mapped[0];
   }
 
   // Fallback to mock
   const mocks = getMockMarkets();
-  return mocks.find((m) => m.slug === slug) || null;
+  return mocks.find((m) => m.slug === slug || m.slug.startsWith(parts[0])) || null;
 }
 
 export async function getMarketNews(platform: string, marketId: string) {
