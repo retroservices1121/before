@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>before</title>
+  <link rel="stylesheet" href="popup.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&family=Instrument+Serif:ital@0;1&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+</head>
+<body>
+  <div id="app">
+    <!-- Header -->
+    <header id="header">
+      <div class="logo">
+        <span class="logo-text">before</span>
+        <span class="logo-dot"></span>
+      </div>
+      <span class="tagline">Know before it matters</span>
+    </header>
+
+    <!-- Settings bar -->
+    <div id="settings-bar">
+      <label class="settings-label">API URL</label>
+      <input type="text" id="api-url" placeholder="https://before-production.up.railway.app" spellcheck="false">
+      <button id="save-settings" title="Save">Save</button>
+    </div>
+
+    <!-- States -->
+    <div id="state-unsupported" class="state hidden">
+      <div class="state-icon">&#x2715;</div>
+      <div class="state-title">Not a market page</div>
+      <div class="state-detail">Navigate to a market on Polymarket or Limitless, then click <em>before</em>.</div>
+    </div>
+
+    <div id="state-no-title" class="state hidden">
+      <div class="state-icon">?</div>
+      <div class="state-title">Could not detect market</div>
+      <div class="state-detail">Make sure you're on a specific market page, not the homepage.</div>
+    </div>
+
+    <div id="state-loading" class="state hidden">
+      <div class="spinner"></div>
+      <div class="state-title" id="loading-title">Generating context brief...</div>
+      <div class="state-detail" id="loading-market"></div>
+    </div>
+
+    <div id="state-error" class="state hidden">
+      <div class="state-icon">!</div>
+      <div class="state-title">Something went wrong</div>
+      <div class="state-detail" id="error-detail"></div>
+      <button id="retry-btn" class="btn-retry">Retry</button>
+    </div>
+
+    <!-- Brief display -->
+    <div id="state-brief" class="hidden">
+      <!-- Market header -->
+      <div id="brief-market-header">
+        <span id="brief-platform" class="platform-badge"></span>
+        <h2 id="brief-title"></h2>
+      </div>
+
+      <!-- Summary -->
+      <section class="brief-section">
+        <div class="section-label">Why This Probability</div>
+        <p id="brief-summary"></p>
+      </section>
+
+      <hr class="divider">
+
+      <!-- Key Factors -->
+      <section class="brief-section">
+        <div class="section-label">Key Factors</div>
+        <div id="brief-factors"></div>
+      </section>
+
+      <!-- Historical Base Rate -->
+      <div id="brief-baserate-wrap" class="hidden">
+        <hr class="divider">
+        <section class="brief-section">
+          <div class="section-label">Historical Base Rate</div>
+          <p id="brief-baserate"></p>
+        </section>
+      </div>
+
+      <!-- Upcoming Catalysts -->
+      <div id="brief-catalysts-wrap" class="hidden">
+        <hr class="divider">
+        <section class="brief-section">
+          <div class="section-label">Upcoming Catalysts</div>
+          <div id="brief-catalysts"></div>
+        </section>
+      </div>
+
+      <!-- Footer -->
+      <div id="brief-footer">
+        <span id="brief-time"></span>
+        <a id="brief-open-b4e" href="#" target="_blank">Open in <em>before</em> &rarr;</a>
+      </div>
+    </div>
+  </div>
+
+  <script src="popup.js"></script>
+</body>
+</html>

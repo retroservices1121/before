@@ -1,0 +1,44 @@
+{
+  "manifest_version": 3,
+  "name": "before - Prediction Market Context",
+  "version": "1.0.0",
+  "description": "AI-powered context briefs for any prediction market. Know before it matters.",
+  "permissions": ["activeTab", "storage"],
+  "host_permissions": [
+    "https://polymarket.com/*",
+    "https://www.polymarket.com/*",
+    "https://limitless.exchange/*",
+    "https://www.limitless.exchange/*"
+  ],
+  "action": {
+    "default_popup": "popup/popup.html",
+    "default_icon": {
+      "16": "icons/icon16.png",
+      "48": "icons/icon48.png",
+      "128": "icons/icon128.png"
+    }
+  },
+  "content_scripts": [
+    {
+      "matches": [
+        "https://polymarket.com/*",
+        "https://www.polymarket.com/*"
+      ],
+      "js": ["content-scripts/polymarket.js"],
+      "run_at": "document_idle"
+    },
+    {
+      "matches": [
+        "https://limitless.exchange/*",
+        "https://www.limitless.exchange/*"
+      ],
+      "js": ["content-scripts/limitless.js"],
+      "run_at": "document_idle"
+    }
+  ],
+  "icons": {
+    "16": "icons/icon16.png",
+    "48": "icons/icon48.png",
+    "128": "icons/icon128.png"
+  }
+}
