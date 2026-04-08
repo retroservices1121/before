@@ -3,7 +3,7 @@
   "name": "before - Prediction Market Context",
   "version": "1.0.0",
   "description": "AI-powered context briefs for any prediction market. Know before it matters.",
-  "permissions": ["activeTab", "storage"],
+  "permissions": ["activeTab"],
   "host_permissions": [
     "https://polymarket.com/*",
     "https://www.polymarket.com/*",

@@ -1,12 +1,10 @@
 // before Chrome Extension - Popup Logic
 
-const DEFAULT_API_URL = 'https://before-production.up.railway.app';
+const API_URL = 'https://before-production.up.railway.app';
 const SUPPORTED_HOSTS = ['polymarket.com', 'www.polymarket.com', 'limitless.exchange', 'www.limitless.exchange'];
 
 // DOM references
 const els = {
-  apiUrl: document.getElementById('api-url'),
-  saveSettings: document.getElementById('save-settings'),
   stateUnsupported: document.getElementById('state-unsupported'),
   stateNoTitle: document.getElementById('state-no-title'),
   stateLoading: document.getElementById('state-loading'),
@@ -145,23 +143,17 @@ function renderBrief(brief, marketInfo) {
   // Footer
   els.briefTime.textContent = brief.generatedAt ? timeAgo(brief.generatedAt) : '';
 
-  // Link to B4E app
   const slug = slugify(marketInfo.title);
-  els.briefOpenB4e.href = `${getApiUrl()}/market/${slug}`;
+  els.briefOpenB4e.href = `${API_URL}/market/${slug}`;
 
   showState('stateBrief');
 }
 
 // --- API ---
 
-function getApiUrl() {
-  return els.apiUrl.value.trim().replace(/\/+$/, '') || DEFAULT_API_URL;
-}
-
 async function fetchBrief(marketInfo) {
   const slug = slugify(marketInfo.title);
-  const apiUrl = getApiUrl();
-  const url = `${apiUrl}/api/context?slug=${encodeURIComponent(slug)}`;
+  const url = `${API_URL}/api/context?slug=${encodeURIComponent(slug)}`;
 
   const response = await fetch(url);
 
@@ -174,13 +166,6 @@ async function fetchBrief(marketInfo) {
 }
 
 async function loadBrief(marketInfo) {
-  const apiUrl = getApiUrl();
-  if (!apiUrl) {
-    els.errorDetail.textContent = 'Set your before API URL above (your Railway deployment URL).';
-    showState('stateError');
-    return;
-  }
-
   currentMarketInfo = marketInfo;
   els.loadingMarket.textContent = marketInfo.title;
   showState('stateLoading');
@@ -197,15 +182,6 @@ async function loadBrief(marketInfo) {
 // --- Init ---
 
 async function init() {
-  // Load saved API URL
-  const stored = await chrome.storage.local.get(['b4eApiUrl']);
-  if (stored.b4eApiUrl) {
-    els.apiUrl.value = stored.b4eApiUrl;
-  } else {
-    els.apiUrl.value = DEFAULT_API_URL;
-  }
-
-  // Get the active tab
   const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
 
   if (!tab || !tab.url) {
@@ -219,7 +195,6 @@ async function init() {
     return;
   }
 
-  // Send message to content script to get market info
   try {
     const response = await chrome.tabs.sendMessage(tab.id, { action: 'getMarketInfo' });
 
@@ -230,21 +205,11 @@ async function init() {
 
     loadBrief(response);
   } catch (err) {
-    // Content script might not be injected yet
     showState('stateNoTitle');
   }
 }
 
 // --- Event listeners ---
-
-els.saveSettings.addEventListener('click', async () => {
-  const url = els.apiUrl.value.trim();
-  await chrome.storage.local.set({ b4eApiUrl: url });
-  els.saveSettings.textContent = 'Saved!';
-  setTimeout(() => {
-    els.saveSettings.textContent = 'Save';
-  }, 1500);
-});
 
 els.retryBtn.addEventListener('click', () => {
   if (currentMarketInfo) {

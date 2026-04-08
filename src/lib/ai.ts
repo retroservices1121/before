@@ -81,7 +81,7 @@ Include 3-5 key factors and 2-3 upcoming catalysts. Be concise and analyst-grade
         ],
         generationConfig: {
           temperature: 0.7,
-          maxOutputTokens: 4096,
+          maxOutputTokens: 1024,
           responseMimeType: 'application/json',
           thinkingConfig: { thinkingBudget: 0 },
         },

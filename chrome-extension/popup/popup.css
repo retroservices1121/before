@@ -91,57 +91,6 @@ body::-webkit-scrollbar-thumb {
   color: var(--text-muted);
 }
 
-/* Settings bar */
-#settings-bar {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  padding: 8px 16px;
-  border-bottom: 1px solid var(--border);
-  background: var(--surface);
-}
-
-.settings-label {
-  font-family: 'JetBrains Mono', monospace;
-  font-size: 9px;
-  letter-spacing: 1px;
-  text-transform: uppercase;
-  color: var(--text-muted);
-  white-space: nowrap;
-}
-
-#api-url {
-  flex: 1;
-  background: var(--bg);
-  border: 1px solid var(--border);
-  border-radius: 4px;
-  padding: 4px 8px;
-  font-family: 'JetBrains Mono', monospace;
-  font-size: 11px;
-  color: var(--text-dim);
-  outline: none;
-}
-
-#api-url:focus {
-  border-color: var(--accent);
-}
-
-#save-settings {
-  background: var(--accent-dim);
-  border: 1px solid rgba(0, 229, 159, 0.3);
-  color: var(--accent);
-  font-family: 'JetBrains Mono', monospace;
-  font-size: 10px;
-  padding: 4px 10px;
-  border-radius: 4px;
-  cursor: pointer;
-  letter-spacing: 0.5px;
-}
-
-#save-settings:hover {
-  background: rgba(0, 229, 159, 0.25);
-}
-
 /* States */
 .state {
   display: flex;
