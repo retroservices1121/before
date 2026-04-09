@@ -1,5 +1,6 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
+import UserMenu from '@/components/UserMenu';
 import './globals.css';
 
 export const metadata: Metadata = {
@@ -35,9 +36,15 @@ export default function RootLayout({
             >
               Markets
             </Link>
-            <span className="font-mono text-[10px] tracking-[2px] uppercase text-b4e-text-muted">
-              About
-            </span>
+            <a
+              href="https://docs.b4enews.com"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="font-mono text-[10px] tracking-[2px] uppercase text-b4e-text-muted hover:text-b4e-text-dim transition-colors no-underline"
+            >
+              Docs
+            </a>
+            <UserMenu />
           </div>
         </nav>
 

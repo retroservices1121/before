@@ -1,14 +1,26 @@
 {
   "manifest_version": 3,
   "name": "before - Prediction Market Context",
-  "version": "1.0.0",
+  "version": "1.2.0",
   "description": "AI-powered context briefs for any prediction market. Know before it matters.",
-  "permissions": ["activeTab"],
+  "permissions": ["activeTab", "storage"],
   "host_permissions": [
     "https://polymarket.com/*",
     "https://www.polymarket.com/*",
     "https://limitless.exchange/*",
-    "https://www.limitless.exchange/*"
+    "https://www.limitless.exchange/*",
+    "https://dflow.net/*",
+    "https://www.dflow.net/*",
+    "https://app.dflow.net/*",
+    "https://kalshi.com/*",
+    "https://www.kalshi.com/*",
+    "https://matchr.xyz/*",
+    "https://www.matchr.xyz/*",
+    "https://app.matchr.xyz/*",
+    "https://polynance.ag/*",
+    "https://www.polynance.ag/*",
+    "https://metamask.io/prediction-markets*",
+    "https://portfolio.metamask.io/*"
   ],
   "action": {
     "default_popup": "popup/popup.html",
@@ -24,7 +36,7 @@
         "https://polymarket.com/*",
         "https://www.polymarket.com/*"
       ],
-      "js": ["content-scripts/polymarket.js"],
+      "js": ["content-scripts/widget.js", "content-scripts/polymarket.js"],
       "run_at": "document_idle"
     },
     {
@@ -32,7 +44,49 @@
         "https://limitless.exchange/*",
         "https://www.limitless.exchange/*"
       ],
-      "js": ["content-scripts/limitless.js"],
+      "js": ["content-scripts/widget.js", "content-scripts/limitless.js"],
+      "run_at": "document_idle"
+    },
+    {
+      "matches": [
+        "https://dflow.net/*",
+        "https://www.dflow.net/*",
+        "https://app.dflow.net/*"
+      ],
+      "js": ["content-scripts/widget.js", "content-scripts/dflow.js"],
+      "run_at": "document_idle"
+    },
+    {
+      "matches": [
+        "https://kalshi.com/*",
+        "https://www.kalshi.com/*"
+      ],
+      "js": ["content-scripts/widget.js", "content-scripts/kalshi.js"],
+      "run_at": "document_idle"
+    },
+    {
+      "matches": [
+        "https://matchr.xyz/*",
+        "https://www.matchr.xyz/*",
+        "https://app.matchr.xyz/*"
+      ],
+      "js": ["content-scripts/widget.js", "content-scripts/matchr.js"],
+      "run_at": "document_idle"
+    },
+    {
+      "matches": [
+        "https://polynance.ag/*",
+        "https://www.polynance.ag/*"
+      ],
+      "js": ["content-scripts/widget.js", "content-scripts/polynance.js"],
+      "run_at": "document_idle"
+    },
+    {
+      "matches": [
+        "https://metamask.io/prediction-markets*",
+        "https://portfolio.metamask.io/*"
+      ],
+      "js": ["content-scripts/widget.js", "content-scripts/metamask.js"],
       "run_at": "document_idle"
     }
   ],

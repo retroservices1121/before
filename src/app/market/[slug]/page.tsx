@@ -1,8 +1,7 @@
 import { notFound } from 'next/navigation';
 import Link from 'next/link';
 import { getMarket } from '@/lib/spredd';
-import { generateContextBrief } from '@/lib/ai';
-import ContextBriefComponent from '@/components/ContextBrief';
+import MarketBriefLoader from '@/components/MarketBriefLoader';
 import {
   formatVolume,
   formatProbability,
@@ -10,7 +9,7 @@ import {
   getPlatformLabel,
 } from '@/lib/utils';
 
-export const dynamic = 'force-dynamic'; // Always generate fresh context
+export const dynamic = 'force-dynamic';
 
 interface PageProps {
   params: { slug: string };
@@ -22,9 +21,6 @@ export default async function MarketPage({ params }: PageProps) {
   if (!market) {
     notFound();
   }
-
-  // Generate AI context brief
-  const brief = await generateContextBrief(market);
 
   const changePositive = (market.priceChange24h ?? 0) > 0;
   const changeColor = changePositive ? 'text-b4e-accent' : 'text-b4e-warm';
@@ -144,7 +140,7 @@ export default async function MarketPage({ params }: PageProps) {
         </div>
       )}
 
-      {/* AI Context Brief */}
+      {/* AI Context Brief — loaded client-side with rate limiting */}
       <div className="mb-8">
         <div className="flex items-center gap-2 mb-4">
           <span className="w-1.5 h-1.5 rounded-full bg-b4e-accent pulse-dot shadow-[0_0_6px_rgba(0,229,159,0.5)]" />
@@ -152,7 +148,7 @@ export default async function MarketPage({ params }: PageProps) {
             Before Intelligence Brief
           </span>
         </div>
-        <ContextBriefComponent brief={brief} />
+        <MarketBriefLoader slug={params.slug} />
       </div>
 
       {/* Trade link */}

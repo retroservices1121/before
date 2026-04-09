@@ -16,15 +16,40 @@
         <span class="logo-text">before</span>
         <span class="logo-dot"></span>
       </div>
-      <span class="tagline">Know before it matters</span>
+      <div id="header-right">
+        <!-- Auth state rendered by JS -->
+      </div>
     </header>
 
+    <!-- Auth panel (hidden by default) -->
+    <div id="auth-panel" class="hidden">
+      <!-- Email step -->
+      <div id="auth-email" class="auth-inner">
+        <label class="auth-label">Sign in with email</label>
+        <div class="auth-row">
+          <input type="email" id="auth-email-input" placeholder="you@example.com" spellcheck="false">
+          <button id="auth-send-code">Send code</button>
+        </div>
+        <p id="auth-email-error" class="auth-error hidden"></p>
+      </div>
+      <!-- Code step -->
+      <div id="auth-code" class="auth-inner hidden">
+        <label class="auth-label">Enter the 6-digit code</label>
+        <div class="auth-row">
+          <input type="text" id="auth-code-input" placeholder="000000" maxlength="6" spellcheck="false">
+          <button id="auth-verify">Verify</button>
+        </div>
+        <p id="auth-code-hint" class="auth-hint"></p>
+        <p id="auth-code-error" class="auth-error hidden"></p>
+        <button id="auth-back" class="auth-back">&larr; Different email</button>
+      </div>
+    </div>
 
     <!-- States -->
     <div id="state-unsupported" class="state hidden">
       <div class="state-icon">&#x2715;</div>
       <div class="state-title">Not a market page</div>
-      <div class="state-detail">Navigate to a market on Polymarket or Limitless, then click <em>before</em>.</div>
+      <div class="state-detail">Navigate to a market on Polymarket, Limitless, Kalshi, or other supported platforms, then click <em>before</em>.</div>
     </div>
 
     <div id="state-no-title" class="state hidden">
@@ -44,6 +69,12 @@
       <div class="state-title">Something went wrong</div>
       <div class="state-detail" id="error-detail"></div>
       <button id="retry-btn" class="btn-retry">Retry</button>
+    </div>
+
+    <div id="state-ratelimit" class="state hidden">
+      <div class="state-icon ratelimit-icon">!</div>
+      <div class="state-title">Daily limit reached</div>
+      <div class="state-detail" id="ratelimit-detail"></div>
     </div>
 
     <!-- Brief display -->

@@ -35,3 +35,14 @@ export interface SpreddMarketsResponse {
   total?: number;
   page?: number;
 }
+
+export interface User {
+  id: string;
+  email: string;
+  apiKey: string;
+  tier: 'lite' | 'pro';
+  stripeCustomerId?: string;
+  stripeSubscriptionId?: string;
+  refPlatform?: string;
+  createdAt: string;
+}
