@@ -358,6 +358,11 @@ body::-webkit-scrollbar-thumb {
   background: rgba(245, 158, 11, 0.12);
 }
 
+.platform-badge.alphaarcade {
+  color: var(--warm);
+  background: rgba(255, 107, 107, 0.12);
+}
+
 #brief-title {
   font-family: 'DM Sans', sans-serif;
   font-size: 15px;

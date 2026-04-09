@@ -9,6 +9,7 @@ const SUPPORTED_HOSTS = [
   'matchr.xyz', 'www.matchr.xyz', 'app.matchr.xyz',
   'polynance.ag', 'www.polynance.ag',
   'metamask.io', 'portfolio.metamask.io',
+  'alphaarcade.com', 'www.alphaarcade.com',
 ];
 
 // DOM references
@@ -81,6 +82,7 @@ function platformLabel(platform) {
     matchr: 'Matchr',
     polynance: 'Polynance',
     metamask: 'MetaMask',
+    alphaarcade: 'Alpha Arcade',
   };
   return labels[platform] || platform;
 }

@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "before - Prediction Market Context",
-  "version": "1.2.0",
+  "version": "1.3.0",
   "description": "AI-powered context briefs for any prediction market. Know before it matters.",
   "permissions": ["activeTab", "storage"],
   "host_permissions": [
@@ -20,7 +20,9 @@
     "https://polynance.ag/*",
     "https://www.polynance.ag/*",
     "https://metamask.io/prediction-markets*",
-    "https://portfolio.metamask.io/*"
+    "https://portfolio.metamask.io/*",
+    "https://alphaarcade.com/*",
+    "https://www.alphaarcade.com/*"
   ],
   "action": {
     "default_popup": "popup/popup.html",
@@ -87,6 +89,14 @@
         "https://portfolio.metamask.io/*"
       ],
       "js": ["content-scripts/widget.js", "content-scripts/metamask.js"],
+      "run_at": "document_idle"
+    },
+    {
+      "matches": [
+        "https://alphaarcade.com/*",
+        "https://www.alphaarcade.com/*"
+      ],
+      "js": ["content-scripts/widget.js", "content-scripts/alphaarcade.js"],
       "run_at": "document_idle"
     }
   ],
