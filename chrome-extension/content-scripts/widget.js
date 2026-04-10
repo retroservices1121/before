@@ -430,53 +430,57 @@ function injectStyles() {
   document.head.appendChild(style);
 }
 
-// Create the widget DOM
+// Create the widget DOM inside a Shadow DOM for full isolation
 function createWidget() {
-  const widget = document.createElement('div');
-  widget.className = isPageLight() ? 'b4e-widget b4e-light' : 'b4e-widget';
-  widget.id = 'b4e-inline-widget';
+  const host = document.createElement('div');
+  host.id = 'b4e-inline-widget';
+  host.style.cssText = 'margin: 16px 0; max-width: 100%;';
 
-  widget.innerHTML = `
-    <div class="b4e-header">
-      <div class="b4e-header-left">
-        <span class="b4e-pulse"></span>
-        <span class="b4e-logo">before</span>
-        <span class="b4e-tagline">Intelligence Brief</span>
+  const shadow = host.attachShadow({ mode: 'open' });
+
+  const themeClass = isPageLight() ? 'b4e-widget b4e-light' : 'b4e-widget';
+
+  shadow.innerHTML = `
+    <style>${WIDGET_STYLES}</style>
+    <div class="${themeClass}">
+      <div class="b4e-header">
+        <div class="b4e-header-left">
+          <span class="b4e-pulse"></span>
+          <span class="b4e-logo">before</span>
+          <span class="b4e-tagline">Intelligence Brief</span>
+        </div>
+        <span class="b4e-toggle">▼</span>
       </div>
-      <span class="b4e-toggle">▼</span>
-    </div>
-    <div class="b4e-body">
-      <div class="b4e-loading">
-        <div class="b4e-spinner"></div>
-        <span class="b4e-loading-text">Generating context brief...</span>
+      <div class="b4e-body">
+        <div class="b4e-loading">
+          <div class="b4e-spinner"></div>
+          <span class="b4e-loading-text">Generating context brief...</span>
+        </div>
       </div>
     </div>
   `;
 
-  // Prevent wheel/touch events from propagating to the host page
-  // This stops Polymarket and other SPAs from intercepting scroll/zoom
-  widget.addEventListener('wheel', (e) => e.stopPropagation(), { passive: true });
-  widget.addEventListener('touchstart', (e) => e.stopPropagation(), { passive: true });
-  widget.addEventListener('touchmove', (e) => e.stopPropagation(), { passive: true });
-  widget.addEventListener('gesturestart', (e) => e.stopPropagation());
-  widget.addEventListener('gesturechange', (e) => e.stopPropagation());
-
-  // Toggle collapse
-  const header = widget.querySelector('.b4e-header');
-  const body = widget.querySelector('.b4e-body');
-  const toggle = widget.querySelector('.b4e-toggle');
+  const widget = shadow.querySelector('.b4e-widget');
+  const header = shadow.querySelector('.b4e-header');
+  const body = shadow.querySelector('.b4e-body');
+  const toggle = shadow.querySelector('.b4e-toggle');
 
   header.addEventListener('click', () => {
     body.classList.toggle('open');
     toggle.classList.toggle('open');
   });
 
-  return widget;
+  // Store shadow ref on host so renderBrief etc. can access it
+  host._shadow = shadow;
+  host._widget = widget;
+
+  return host;
 }
 
 // Render brief into widget body
-function renderBrief(widget, brief, platform, refreshFn) {
-  const body = widget.querySelector('.b4e-body');
+function renderBrief(host, brief, platform, refreshFn) {
+  const shadow = host._shadow;
+  const body = shadow.querySelector('.b4e-body');
   const slug = brief._slug || '';
   const refParam = platform ? `?ref=${encodeURIComponent(platform)}` : '';
 
@@ -572,8 +576,8 @@ function renderBrief(widget, brief, platform, refreshFn) {
   }
 }
 
-function renderError(widget, message, retryFn) {
-  const body = widget.querySelector('.b4e-body');
+function renderError(host, message, retryFn) {
+  const body = host._shadow.querySelector('.b4e-body');
   body.innerHTML = `
     <div class="b4e-error">
       <div class="b4e-error-text">${escapeHtml(message)}</div>
@@ -583,8 +587,8 @@ function renderError(widget, message, retryFn) {
   body.querySelector('.b4e-retry').addEventListener('click', retryFn);
 }
 
-function renderRateLimit(widget, message, platform) {
-  const body = widget.querySelector('.b4e-body');
+function renderRateLimit(host, message, platform) {
+  const body = host._shadow.querySelector('.b4e-body');
   body.innerHTML = `
     <div class="b4e-ratelimit">
       <div class="b4e-ratelimit-text">${escapeHtml(message || 'Beta limit: 2 free briefs per day')}</div>
@@ -649,24 +653,23 @@ async function injectB4EWidget(anchorEl, title, platform, extra) {
   // Don't inject twice
   if (document.getElementById('b4e-inline-widget')) return;
 
-  injectStyles();
-
-  // Delay theme detection slightly so SPAs have time to apply their styles
+  // Delay slightly so SPAs have time to apply their styles (for theme detection)
   await new Promise((r) => setTimeout(r, 200));
 
-  const widget = createWidget();
-  anchorEl.parentNode.insertBefore(widget, anchorEl.nextSibling);
+  const host = createWidget();
+  anchorEl.parentNode.insertBefore(host, anchorEl.nextSibling);
 
   // Auto-expand on first load
-  const body = widget.querySelector('.b4e-body');
-  const toggle = widget.querySelector('.b4e-toggle');
+  const body = host._shadow.querySelector('.b4e-body');
+  const toggle = host._shadow.querySelector('.b4e-toggle');
   body.classList.add('open');
   toggle.classList.add('open');
+  const widget = host; // alias for readability in loadBrief
 
   // Fetch and render
   async function loadBrief(refresh) {
     // Show loading state
-    const body = widget.querySelector('.b4e-body');
+    const body = widget._shadow.querySelector('.b4e-body');
     body.innerHTML = `
       <div class="b4e-loading">
         <div class="b4e-spinner"></div>
