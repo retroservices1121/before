@@ -401,6 +401,40 @@ async function init() {
   }
 }
 
+// --- API Key (hidden, triple-click logo to reveal) ---
+
+const logoText = document.querySelector('.logo-text');
+const apikeyPanel = document.getElementById('apikey-panel');
+const apikeyInput = document.getElementById('apikey-input');
+const apikeySave = document.getElementById('apikey-save');
+let logoClickCount = 0;
+let logoClickTimer = null;
+
+logoText.addEventListener('click', () => {
+  logoClickCount++;
+  clearTimeout(logoClickTimer);
+  logoClickTimer = setTimeout(() => { logoClickCount = 0; }, 500);
+
+  if (logoClickCount >= 3) {
+    logoClickCount = 0;
+    apikeyPanel.classList.toggle('hidden');
+    if (!apikeyPanel.classList.contains('hidden') && apiKey) {
+      apikeyInput.value = apiKey;
+    }
+  }
+});
+
+apikeySave.addEventListener('click', async () => {
+  apiKey = apikeyInput.value.trim();
+  await chrome.storage.sync.set({ b4eApiKey: apiKey });
+  apikeySave.textContent = 'Saved!';
+  setTimeout(() => { apikeySave.textContent = 'Save'; }, 1500);
+  // Reload brief with new key
+  if (currentMarketInfo) {
+    loadBrief(currentMarketInfo);
+  }
+});
+
 // --- Event listeners ---
 
 els.authSendCode.addEventListener('click', handleSendCode);
