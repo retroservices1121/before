@@ -574,6 +574,7 @@ async function fetchBrief(title, extra) {
   if (extra) {
     if (extra.ticker) url += `&ticker=${encodeURIComponent(extra.ticker)}`;
     if (extra.platform) url += `&platform=${encodeURIComponent(extra.platform)}`;
+    if (extra.slug) url += `&eventSlug=${encodeURIComponent(extra.slug)}`;
   }
 
   // Check for stored API key

@@ -2,31 +2,40 @@
 // Extracts market title and injects inline B4E widget
 
 function getMarketTitle() {
+  // Try h1 first (regular event pages)
   const h1 = document.querySelector('h1');
-  if (h1 && h1.textContent.trim()) {
+  if (h1 && h1.textContent.trim().length > 3) {
     return h1.textContent.trim();
   }
 
+  // Try common selectors
   const selectors = [
     '[data-testid="market-title"]',
+    '[data-testid="event-title"]',
     '[class*="MarketTitle"]',
     '[class*="market-title"]',
     '[class*="EventTitle"]',
     '[class*="event-title"]',
+    '[class*="GameTitle"]',
+    '[class*="game-title"]',
+    '[class*="MatchTitle"]',
     'h2',
+    'h3',
   ];
   for (const sel of selectors) {
     const el = document.querySelector(sel);
-    if (el && el.textContent.trim()) {
+    if (el && el.textContent.trim().length > 3) {
       return el.textContent.trim();
     }
   }
 
+  // og:title is set server-side and works even before React renders
   const ogTitle = document.querySelector('meta[property="og:title"]');
   if (ogTitle && ogTitle.content) {
     return ogTitle.content.replace(/\s*[-|]\s*Polymarket\s*$/i, '').trim();
   }
 
+  // document.title
   const pageTitle = document.title
     .replace(/\s*[-|]\s*Polymarket\s*$/i, '')
     .replace(/\s*[-|]\s*Will\s.*$/, '')
@@ -35,6 +44,7 @@ function getMarketTitle() {
     return pageTitle;
   }
 
+  // Derive from URL slug (last path segment)
   const pathParts = window.location.pathname.split('/').filter(Boolean);
   if (pathParts.length >= 2) {
     const slug = pathParts[pathParts.length - 1];
@@ -44,29 +54,42 @@ function getMarketTitle() {
   return null;
 }
 
+function getPolymarketSlug() {
+  const pathParts = window.location.pathname.split('/').filter(Boolean);
+  // /event/{slug} or /sports/{sport}/{slug}
+  return pathParts[pathParts.length - 1] || null;
+}
+
 function getMarketUrl() {
   return window.location.href;
 }
 
 // Find the best anchor element to inject the widget after
 function findAnchor() {
-  // Try after the market title h1
   const h1 = document.querySelector('h1');
   if (h1) return h1;
 
-  // Try after the market header area
   const selectors = [
     '[data-testid="market-title"]',
+    '[data-testid="event-title"]',
     '[class*="MarketTitle"]',
     '[class*="market-title"]',
     '[class*="EventTitle"]',
     '[class*="MarketHeader"]',
     '[class*="market-header"]',
+    '[class*="GameTitle"]',
+    '[class*="MatchTitle"]',
+    'h2',
+    'h3',
   ];
   for (const sel of selectors) {
     const el = document.querySelector(sel);
     if (el) return el;
   }
+
+  // Fallback: main content area
+  const mainEl = document.querySelector('main') || document.querySelector('[role="main"]');
+  if (mainEl) return mainEl;
 
   return null;
 }
@@ -92,7 +115,8 @@ function waitAndInject(attempts = 0) {
   const anchor = findAnchor();
 
   if (title && anchor && window.__b4e) {
-    window.__b4e.injectB4EWidget(anchor, title, 'polymarket');
+    const slug = getPolymarketSlug();
+    window.__b4e.injectB4EWidget(anchor, title, 'polymarket', { slug, platform: 'polymarket' });
     return;
   }
 

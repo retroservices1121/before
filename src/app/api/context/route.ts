@@ -42,6 +42,7 @@ export async function GET(request: NextRequest) {
   const title = request.nextUrl.searchParams.get('title');
   const ticker = request.nextUrl.searchParams.get('ticker');
   const platform = request.nextUrl.searchParams.get('platform');
+  const eventSlug = request.nextUrl.searchParams.get('eventSlug');
 
   if (!slug && !title && !ticker) {
     return NextResponse.json(
@@ -98,6 +99,14 @@ export async function GET(request: NextRequest) {
 
   // Try to find the market using all available signals
   let market = slug ? await getMarket(slug) : null;
+
+  // Try Polymarket event slug (e.g., "nba-det-cha-2026-04-10")
+  if (!market && eventSlug) {
+    const results = await searchMarkets(eventSlug.replace(/-/g, ' '));
+    if (results && results.length > 0) {
+      market = results[0];
+    }
+  }
 
   // Try direct Spredd lookup by platform + ticker (e.g., kalshi/kxpgatour-mast26)
   if (!market && ticker && platform) {
