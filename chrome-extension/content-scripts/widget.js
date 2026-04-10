@@ -125,15 +125,11 @@ const WIDGET_STYLES = `
 
   /* Body - collapsible */
   .b4e-body {
-    max-height: 0;
-    overflow: hidden;
-    transition: max-height 0.4s ease;
+    display: none;
   }
 
   .b4e-body.open {
-    max-height: 600px;
-    overflow-y: auto;
-    overflow-x: hidden;
+    display: block;
   }
 
   .b4e-inner {
