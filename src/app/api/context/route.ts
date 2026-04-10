@@ -51,7 +51,7 @@ export async function GET(request: NextRequest) {
     );
   }
 
-  const cacheKey = slug || slugify(title || '');
+  const cacheKey = ticker ? `${platform || 'unknown'}:${ticker}` : (slug || slugify(title || ''));
   const refresh = request.nextUrl.searchParams.get('refresh') === '1';
 
   // Check cache first — cached briefs are free, no usage counted
@@ -102,27 +102,33 @@ export async function GET(request: NextRequest) {
   }
 
   // Try to find the market using all available signals
-  let market = slug ? await getMarket(slug) : null;
+  // Ticker is the most reliable identifier - try it first
+  let market = null;
+
+  if (ticker && platform) {
+    market = await getMarket(`--${platform}--${encodeURIComponent(ticker)}`);
+    if (!market) {
+      market = await getMarket(`--${platform}--${encodeURIComponent(ticker.toLowerCase())}`);
+    }
+    // Search by ticker keywords as fallback
+    if (!market) {
+      const results = await searchMarkets(ticker.replace(/[-_]/g, ' '));
+      if (results && results.length > 0) market = results[0];
+    }
+  }
+
+  // Try slug lookup
+  if (!market && slug) {
+    market = await getMarket(slug);
+  }
 
   // Try Polymarket event slug directly via Polymarket API
   if (!market && eventSlug) {
     market = await getPolymarketBySlug(eventSlug);
   }
-  // Also try searching Spredd by event slug keywords
   if (!market && eventSlug) {
     const results = await searchMarkets(eventSlug.replace(/-/g, ' '));
-    if (results && results.length > 0) {
-      market = results[0];
-    }
-  }
-
-  // Try direct Spredd lookup by platform + ticker (e.g., kalshi/kxpgatour-mast26)
-  if (!market && ticker && platform) {
-    // Try as-is, then lowercase
-    market = await getMarket(`--${platform}--${encodeURIComponent(ticker)}`);
-    if (!market) {
-      market = await getMarket(`--${platform}--${encodeURIComponent(ticker.toLowerCase())}`);
-    }
+    if (results && results.length > 0) market = results[0];
   }
 
   // Try searching by title

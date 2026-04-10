@@ -642,7 +642,8 @@ function escapeHtml(str) {
 
 // Fetch brief from B4E API
 async function fetchBrief(title, extra, refresh) {
-  const slug = slugify(title);
+  // Use ticker as the primary identifier when available (more reliable than title)
+  const slug = (extra && extra.ticker) ? slugify(extra.ticker) : slugify(title);
   let url = `${B4E_API}/api/context?slug=${encodeURIComponent(slug)}&title=${encodeURIComponent(title)}`;
   if (refresh) url += '&refresh=1';
 
