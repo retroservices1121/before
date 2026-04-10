@@ -59,13 +59,9 @@ function getMarketTitle() {
     return pageTitle;
   }
 
-  // Last resort: convert ticker from URL to readable title
-  const ticker = getTickerFromUrl();
-  if (ticker) {
-    // KXPRESPERSON-28 -> "2028 Presidential Election Winner" (Kalshi convention)
-    return ticker.replace(/-/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase());
-  }
-
+  // Do NOT fall back to the ticker as a title - it produces meaningless
+  // strings like "Kxpresnomr 28" that match the wrong market in search.
+  // Return null so waitAndInject keeps retrying until the real title renders.
   return null;
 }
 

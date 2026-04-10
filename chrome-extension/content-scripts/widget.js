@@ -55,6 +55,10 @@ const WIDGET_STYLES = `
     padding: 0;
   }
 
+  .b4e-widget, .b4e-widget * {
+    overscroll-behavior: auto;
+  }
+
   /* Header bar - always visible */
   .b4e-header {
     display: flex;
@@ -127,8 +131,9 @@ const WIDGET_STYLES = `
   }
 
   .b4e-body.open {
-    max-height: none;
-    overflow: visible;
+    max-height: 600px;
+    overflow-y: auto;
+    overflow-x: hidden;
   }
 
   .b4e-inner {
