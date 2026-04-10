@@ -101,7 +101,11 @@ export async function GET(request: NextRequest) {
 
   // Try direct Spredd lookup by platform + ticker (e.g., kalshi/kxpgatour-mast26)
   if (!market && ticker && platform) {
+    // Try as-is, then lowercase
     market = await getMarket(`--${platform}--${encodeURIComponent(ticker)}`);
+    if (!market) {
+      market = await getMarket(`--${platform}--${encodeURIComponent(ticker.toLowerCase())}`);
+    }
   }
 
   // Try searching by title

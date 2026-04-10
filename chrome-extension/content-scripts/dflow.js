@@ -3,11 +3,14 @@
 // URL pattern: dflow.net/prediction/{TICKER}
 
 function isMarketPage() {
-  return /^\/prediction\//i.test(window.location.pathname);
+  // Must have a ticker segment after /prediction/ (e.g., /prediction/KXPGATOUR-MAST26)
+  // Exclude category pages like /prediction or /prediction/
+  const ticker = getTickerFromUrl();
+  return ticker !== null && ticker.length > 0;
 }
 
 function getTickerFromUrl() {
-  const match = window.location.pathname.match(/\/prediction\/([^/?#]+)/i);
+  const match = window.location.pathname.match(/\/prediction\/([A-Za-z0-9][\w-]+)/);
   return match ? match[1] : null;
 }
 
