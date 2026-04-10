@@ -52,9 +52,13 @@ export async function GET(request: NextRequest) {
   }
 
   const cacheKey = slug || slugify(title || '');
+  const refresh = request.nextUrl.searchParams.get('refresh') === '1';
 
   // Check cache first — cached briefs are free, no usage counted
-  const cached = getCachedBrief(cacheKey);
+  if (refresh) {
+    briefCache.delete(cacheKey);
+  }
+  const cached = !refresh ? getCachedBrief(cacheKey) : null;
   if (cached) {
     return NextResponse.json(cached, {
       headers: {

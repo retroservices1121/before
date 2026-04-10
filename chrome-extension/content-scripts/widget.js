@@ -311,6 +311,21 @@ const WIDGET_STYLES = `
     text-decoration: underline;
   }
 
+  .b4e-refresh {
+    background: none;
+    border: none;
+    color: var(--b4e-muted);
+    font-size: 14px;
+    cursor: pointer;
+    padding: 0;
+    line-height: 1;
+    transition: color 0.2s;
+  }
+
+  .b4e-refresh:hover {
+    color: var(--b4e-accent);
+  }
+
   /* Rate limit */
   .b4e-ratelimit {
     padding: 16px 14px;
@@ -450,7 +465,7 @@ function createWidget() {
 }
 
 // Render brief into widget body
-function renderBrief(widget, brief, platform) {
+function renderBrief(widget, brief, platform, refreshFn) {
   const body = widget.querySelector('.b4e-body');
   const slug = brief._slug || '';
   const refParam = platform ? `?ref=${encodeURIComponent(platform)}` : '';
@@ -529,13 +544,22 @@ function renderBrief(widget, brief, platform) {
   html += `
     <div class="b4e-footer">
       <span class="b4e-time">${brief.generatedAt ? timeAgo(brief.generatedAt) : ''}</span>
-      <a class="b4e-link" href="${B4E_API}/market/${slug}" target="_blank">
-        Open in before &rarr;
-      </a>
+      <div style="display:flex;align-items:center;gap:10px;">
+        <button class="b4e-refresh" title="Refresh brief">&#x21bb;</button>
+        <a class="b4e-link" href="${B4E_API}/market/${slug}" target="_blank">
+          Open in before &rarr;
+        </a>
+      </div>
     </div>
   `;
 
   body.innerHTML = html;
+
+  // Wire refresh button
+  const refreshBtn = body.querySelector('.b4e-refresh');
+  if (refreshBtn && refreshFn) {
+    refreshBtn.addEventListener('click', refreshFn);
+  }
 }
 
 function renderError(widget, message, retryFn) {
@@ -566,9 +590,10 @@ function escapeHtml(str) {
 }
 
 // Fetch brief from B4E API
-async function fetchBrief(title, extra) {
+async function fetchBrief(title, extra, refresh) {
   const slug = slugify(title);
   let url = `${B4E_API}/api/context?slug=${encodeURIComponent(slug)}&title=${encodeURIComponent(title)}`;
+  if (refresh) url += '&refresh=1';
 
   // Pass extra context for better matching
   if (extra) {
@@ -629,20 +654,29 @@ async function injectB4EWidget(anchorEl, title, platform, extra) {
   toggle.classList.add('open');
 
   // Fetch and render
-  async function loadBrief() {
+  async function loadBrief(refresh) {
+    // Show loading state
+    const body = widget.querySelector('.b4e-body');
+    body.innerHTML = `
+      <div class="b4e-loading">
+        <div class="b4e-spinner"></div>
+        <span class="b4e-loading-text">${refresh ? 'Refreshing brief...' : 'Generating context brief...'}</span>
+      </div>
+    `;
+
     try {
-      const brief = await fetchBrief(title, extra);
-      renderBrief(widget, brief, platform);
+      const brief = await fetchBrief(title, extra, refresh);
+      renderBrief(widget, brief, platform, () => loadBrief(true));
     } catch (err) {
       if (err.rateLimited) {
         renderRateLimit(widget, err.message, platform);
       } else {
-        renderError(widget, err.message, loadBrief);
+        renderError(widget, err.message, () => loadBrief(false));
       }
     }
   }
 
-  loadBrief();
+  loadBrief(false);
 }
 
 // Export for use by content scripts
