@@ -71,9 +71,10 @@ function findAnchor() {
   return null;
 }
 
-// Polymarket market pages have /event/ in the URL
+// Polymarket market pages: /event/{slug} with a slug segment
+// Skip: /, /markets, /browse, /portfolio, /activity, etc.
 function isMarketPage() {
-  return /\/(event|market)\//i.test(window.location.pathname);
+  return /^\/event\/[^/]+/i.test(window.location.pathname);
 }
 
 // Wait for DOM to be ready, then inject widget

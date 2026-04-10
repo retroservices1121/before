@@ -80,11 +80,9 @@ function findAnchor() {
   return null;
 }
 
-// Limitless market pages typically have a slug path, not the root
+// Limitless market pages: /markets/{slug}
 function isMarketPage() {
-  const path = window.location.pathname;
-  // Skip homepage, explore, portfolio, etc.
-  return path !== '/' && !path.startsWith('/explore') && !path.startsWith('/portfolio') && path.split('/').filter(Boolean).length >= 1;
+  return /^\/markets\/[^/]+/i.test(window.location.pathname);
 }
 
 function waitAndInject(attempts = 0) {
