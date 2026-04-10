@@ -102,53 +102,39 @@ export async function GET(request: NextRequest) {
   }
 
   // Try to find the market using all available signals
-  // Ticker is the most reliable identifier - try it first
   let market = null;
 
+  // 1. Direct Spredd lookup by platform + ticker (most precise)
   if (ticker && platform) {
     market = await getMarket(`--${platform}--${encodeURIComponent(ticker)}`);
     if (!market) {
       market = await getMarket(`--${platform}--${encodeURIComponent(ticker.toLowerCase())}`);
     }
-    // Search by ticker keywords as fallback
-    if (!market) {
-      const results = await searchMarkets(ticker.replace(/[-_]/g, ' '));
-      if (results && results.length > 0) market = results[0];
-    }
+    // If ticker lookup fails, DON'T fuzzy search with ticker keywords.
+    // Ticker strings like "KXHIGHNY-26APR10" produce garbage search results.
+    // Fall through to synthetic market creation below.
   }
 
-  // Try slug lookup
+  // 2. Direct slug lookup
   if (!market && slug) {
     market = await getMarket(slug);
   }
 
-  // Try Polymarket event slug directly via Polymarket API
+  // 3. Polymarket event slug via their API
   if (!market && eventSlug) {
     market = await getPolymarketBySlug(eventSlug);
   }
-  if (!market && eventSlug) {
-    const results = await searchMarkets(eventSlug.replace(/-/g, ' '));
-    if (results && results.length > 0) market = results[0];
-  }
 
-  // Try searching by title
-  if (!market && title) {
+  // 4. Search by title (only if no ticker - ticker markets use synthetic fallback)
+  if (!market && title && !ticker) {
     const results = await searchMarkets(title);
     if (results && results.length > 0) {
       market = results[0];
     }
   }
 
-  // Try searching by ticker as keywords
-  if (!market && ticker) {
-    const results = await searchMarkets(ticker.replace(/[-_]/g, ' '));
-    if (results && results.length > 0) {
-      market = results[0];
-    }
-  }
-
-  // Try searching with slug as keywords
-  if (!market && slug && !title) {
+  // 5. Search by slug keywords (only if no title and no ticker)
+  if (!market && slug && !title && !ticker) {
     const searchTerm = slug.replace(/-/g, ' ');
     const results = await searchMarkets(searchTerm);
     if (results && results.length > 0) {
