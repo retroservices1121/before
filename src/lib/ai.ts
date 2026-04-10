@@ -7,22 +7,30 @@ const GEMINI_API_KEY = process.env.GEMINI_API_KEY || '';
 const GEMINI_MODEL = process.env.GEMINI_MODEL || 'gemini-2.5-flash';
 const GEMINI_API_URL = `https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_MODEL}:generateContent`;
 
+// Race a promise against a timeout (returns null on timeout)
+function withTimeout<T>(promise: Promise<T>, ms: number): Promise<T | null> {
+  return Promise.race([
+    promise,
+    new Promise<null>((resolve) => setTimeout(() => resolve(null), ms)),
+  ]);
+}
+
 /**
  * Generate an AI context brief for a given market.
- * 
+ *
  * Pipeline:
- * 1. TinyFish Web Agent crawls real-time news and data
- * 2. Tokens API enriches crypto markets with live price/risk data (optional)
+ * 1. TinyFish Web Agent crawls real-time news and data (10s timeout)
+ * 2. Tokens API enriches crypto markets with live price/risk data (5s timeout)
  * 3. Gemini synthesizes all data sources into a structured brief
  */
 export async function generateContextBrief(market: Market): Promise<ContextBrief> {
-  // Step 1 + 2: Fetch news context and crypto data in parallel
+  // Step 1 + 2: Fetch news context and crypto data in parallel with timeouts
   const isPolymarket = market.platform === 'polymarket' && market.conditionId;
 
   const [spreadContext, webContext, cryptoEnrichment] = await Promise.all([
-    isPolymarket ? getSpreadContext(market.conditionId!) : Promise.resolve(null),
-    !isPolymarket ? crawlMarketContext(market.title, market.category) : Promise.resolve(null),
-    enrichCryptoMarket(market.title, market.category),
+    isPolymarket ? withTimeout(getSpreadContext(market.conditionId!), 8000) : Promise.resolve(null),
+    !isPolymarket ? withTimeout(crawlMarketContext(market.title, market.category), 10000) : Promise.resolve(null),
+    withTimeout(enrichCryptoMarket(market.title, market.category), 5000),
   ]);
 
   // Use Spread correlated news for Polymarket, TinyFish for others
@@ -41,33 +49,16 @@ export async function generateContextBrief(market: Market): Promise<ContextBrief
     : '';
 
   // Step 3: Gemini synthesizes everything
-  const prompt = `You are Before, an AI market intelligence engine for prediction markets. Generate a context brief for this market.
+  const prompt = `Generate a prediction market context brief. Be concise, specific, analyst-grade.
 
 Market: ${market.title}
-Description: ${market.description || 'N/A'}
-Current probability: ${(market.probability * 100).toFixed(1)}%
-24h price change: ${market.priceChange24h ? `${market.priceChange24h > 0 ? '+' : ''}${market.priceChange24h}%` : 'N/A'}
-24h volume: $${market.volume24h ? market.volume24h.toLocaleString() : 'N/A'}
-Total volume: $${market.volume.toLocaleString()}
-Platform: ${market.platform}
-Resolution date: ${market.endDate || 'TBD'}
-Category: ${market.category || 'General'}${newsBlock}${cryptoBlock}
+Probability: ${(market.probability * 100).toFixed(1)}% | Volume: $${market.volume.toLocaleString()} | Platform: ${market.platform}
+${market.endDate ? `Resolves: ${market.endDate}` : ''}${market.priceChange24h ? ` | 24h: ${market.priceChange24h > 0 ? '+' : ''}${market.priceChange24h}%` : ''}${newsBlock}${cryptoBlock}
 
-Respond with ONLY valid JSON (no markdown, no backticks) in this exact format:
-{
-  "summary": "2-3 sentences explaining WHY the probability is where it is right now. Reference recent events, data, or developments. If web context was provided, incorporate those specific details. If live crypto market data was provided, reference actual price action and trends. Be specific and informative.",
-  "keyFactors": [
-    {
-      "name": "Short factor name",
-      "sentiment": "bullish|bearish|neutral|pending",
-      "detail": "One sentence explaining this factor"
-    }
-  ],
-  "historicalBaseRate": "One sentence about historical precedent or base rate for this type of event.",
-  "upcomingCatalysts": ["Upcoming event or date that could move this market"]
-}
+JSON response:
+{"summary":"2-3 sentences on WHY probability is here. Reference specific events/data.","keyFactors":[{"name":"Factor","sentiment":"bullish|bearish|neutral","detail":"One sentence"}],"historicalBaseRate":"One sentence on precedent.","upcomingCatalysts":["Event that could move this market"]}
 
-Include 3-5 key factors and 2-3 upcoming catalysts. Be concise and analyst-grade. Do not hedge excessively. Write like a research analyst, not a chatbot.`;
+3-5 factors, 2-3 catalysts. No hedging. Write like a research analyst.`;
 
   try {
     const response = await fetch(`${GEMINI_API_URL}?key=${GEMINI_API_KEY}`, {
@@ -81,7 +72,7 @@ Include 3-5 key factors and 2-3 upcoming catalysts. Be concise and analyst-grade
         ],
         generationConfig: {
           temperature: 0.7,
-          maxOutputTokens: 1024,
+          maxOutputTokens: 800,
           responseMimeType: 'application/json',
           thinkingConfig: { thinkingBudget: 0 },
         },
