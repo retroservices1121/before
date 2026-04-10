@@ -119,7 +119,9 @@ function waitAndInject(attempts = 0) {
   const anchor = findAnchor();
 
   if (title && anchor && window.__b4e) {
-    window.__b4e.injectB4EWidget(anchor, title, 'dflow');
+    // DFlow tokenizes Kalshi markets, so pass the ticker with platform 'kalshi'
+    const ticker = getTickerFromUrl();
+    window.__b4e.injectB4EWidget(anchor, title, 'dflow', { ticker, platform: 'kalshi' });
     return;
   }
 
