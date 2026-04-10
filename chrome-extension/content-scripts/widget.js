@@ -430,18 +430,39 @@ function injectStyles() {
   document.head.appendChild(style);
 }
 
-// Create the widget DOM inside a Shadow DOM for full isolation
+// Create the widget as a fixed-position overlay panel
+// Uses Shadow DOM on a body-level element to avoid host page layout/scroll issues
 function createWidget() {
+  // The host sits directly on document.body, position fixed
   const host = document.createElement('div');
   host.id = 'b4e-inline-widget';
-  host.style.cssText = 'margin: 16px 0; max-width: 100%;';
+  host.style.cssText = 'position: fixed; bottom: 16px; right: 16px; z-index: 2147483647; width: 380px; max-height: 80vh;';
 
   const shadow = host.attachShadow({ mode: 'open' });
 
   const themeClass = isPageLight() ? 'b4e-widget b4e-light' : 'b4e-widget';
 
   shadow.innerHTML = `
-    <style>${WIDGET_STYLES}</style>
+    <style>
+      ${WIDGET_STYLES}
+      .b4e-widget {
+        margin: 0;
+        max-height: 80vh;
+        display: flex;
+        flex-direction: column;
+        box-shadow: 0 4px 24px rgba(0,0,0,0.4), 0 0 20px rgba(0,229,159,0.08);
+      }
+      .b4e-body.open {
+        display: block;
+        overflow-y: auto;
+        max-height: calc(80vh - 80px);
+      }
+      @media (max-width: 480px) {
+        .b4e-widget {
+          border-radius: 12px 12px 0 0;
+        }
+      }
+    </style>
     <div class="${themeClass}">
       <div class="b4e-header">
         <div class="b4e-header-left">
@@ -449,7 +470,7 @@ function createWidget() {
           <span class="b4e-logo">before</span>
           <span class="b4e-tagline">Intelligence Brief</span>
         </div>
-        <span class="b4e-toggle">▼</span>
+        <span class="b4e-toggle" style="cursor:pointer;">✕</span>
       </div>
       <div class="b4e-body">
         <div class="b4e-loading">
@@ -460,19 +481,35 @@ function createWidget() {
     </div>
   `;
 
-  const widget = shadow.querySelector('.b4e-widget');
   const header = shadow.querySelector('.b4e-header');
   const body = shadow.querySelector('.b4e-body');
   const toggle = shadow.querySelector('.b4e-toggle');
 
-  header.addEventListener('click', () => {
-    body.classList.toggle('open');
-    toggle.classList.toggle('open');
+  // Close/minimize the panel
+  toggle.addEventListener('click', (e) => {
+    e.stopPropagation();
+    if (body.classList.contains('open')) {
+      body.classList.remove('open');
+      toggle.textContent = '▲';
+    } else {
+      body.classList.add('open');
+      toggle.textContent = '✕';
+    }
   });
 
-  // Store shadow ref on host so renderBrief etc. can access it
+  // Clicking header (not toggle) also toggles
+  header.addEventListener('click', () => {
+    if (body.classList.contains('open')) {
+      body.classList.remove('open');
+      toggle.textContent = '▲';
+    } else {
+      body.classList.add('open');
+      toggle.textContent = '✕';
+    }
+  });
+
   host._shadow = shadow;
-  host._widget = widget;
+  host._widget = shadow.querySelector('.b4e-widget');
 
   return host;
 }
@@ -657,14 +694,14 @@ async function injectB4EWidget(anchorEl, title, platform, extra) {
   await new Promise((r) => setTimeout(r, 200));
 
   const host = createWidget();
-  anchorEl.parentNode.insertBefore(host, anchorEl.nextSibling);
+  document.body.appendChild(host);
 
   // Auto-expand on first load
   const body = host._shadow.querySelector('.b4e-body');
   const toggle = host._shadow.querySelector('.b4e-toggle');
   body.classList.add('open');
-  toggle.classList.add('open');
-  const widget = host; // alias for readability in loadBrief
+  toggle.textContent = '✕';
+  const widget = host;
 
   // Fetch and render
   async function loadBrief(refresh) {
