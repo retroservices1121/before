@@ -185,6 +185,49 @@ export async function getPolymarketBySlug(eventSlug: string): Promise<Market | n
   }
 }
 
+/**
+ * Direct DFlow API fallback for Kalshi markets tokenized on Solana.
+ * DFlow tickers map 1:1 to Kalshi tickers.
+ */
+export async function getDFlowMarket(ticker: string): Promise<Market | null> {
+  const DFLOW_API = 'https://dev-prediction-markets-api.dflow.net';
+  const apiKey = process.env.DFLOW_API_KEY || '';
+
+  try {
+    const headers: Record<string, string> = { 'Content-Type': 'application/json' };
+    if (apiKey) headers['x-api-key'] = apiKey;
+
+    const res = await fetch(`${DFLOW_API}/api/v1/market/${encodeURIComponent(ticker)}`, {
+      headers,
+      next: { revalidate: 60 },
+    });
+
+    if (!res.ok) return null;
+
+    const data = await res.json();
+    const mkt = data.market || data;
+
+    const yesBid = parseFloat(mkt.yesBid || '0');
+
+    return {
+      id: `dflow-${mkt.ticker || ticker}`,
+      slug: (mkt.ticker || ticker).toLowerCase(),
+      title: mkt.title || ticker,
+      description: mkt.rulesPrimary || undefined,
+      probability: yesBid,
+      volume: parseInt(mkt.volume || '0', 10),
+      volume24h: mkt.volume24hFp ? parseFloat(mkt.volume24hFp) : undefined,
+      platform: 'kalshi',
+      category: undefined,
+      endDate: mkt.closeTime ? new Date(mkt.closeTime * 1000).toISOString().slice(0, 10) : undefined,
+      url: `https://dflow.net/prediction/${mkt.ticker || ticker}`,
+    };
+  } catch (error) {
+    console.error('DFlow API lookup failed:', error);
+    return null;
+  }
+}
+
 export async function getMarketNews(platform: string, marketId: string) {
   return spreddFetch<{ title: string; url: string; source: string }[]>(
     `/v1/news/market/${platform}/${marketId}`

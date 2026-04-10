@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createHash } from 'crypto';
-import { getMarket, searchMarkets, getPolymarketBySlug } from '@/lib/spredd';
+import { getMarket, searchMarkets, getPolymarketBySlug, getDFlowMarket } from '@/lib/spredd';
 import { generateContextBrief } from '@/lib/ai';
 import { getSession } from '@/lib/auth';
 import { checkRateLimit, recordUsage, BETA_MODE } from '@/lib/rate-limit';
@@ -110,9 +110,10 @@ export async function GET(request: NextRequest) {
     if (!market) {
       market = await getMarket(`--${platform}--${encodeURIComponent(ticker.toLowerCase())}`);
     }
-    // If ticker lookup fails, DON'T fuzzy search with ticker keywords.
-    // Ticker strings like "KXHIGHNY-26APR10" produce garbage search results.
-    // Fall through to synthetic market creation below.
+    // 1b. Try DFlow's own API (for Kalshi markets tokenized on Solana)
+    if (!market) {
+      market = await getDFlowMarket(ticker);
+    }
   }
 
   // 2. Direct slug lookup
