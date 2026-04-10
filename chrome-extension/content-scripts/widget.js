@@ -40,12 +40,13 @@ const WIDGET_STYLES = `
     border: 1px solid var(--b4e-border);
     border-radius: 12px;
     margin: 16px 0;
-    overflow: hidden;
+    overflow: visible;
     color: var(--b4e-text);
     font-size: 13px;
     line-height: 1.6;
     box-shadow: 0 0 20px rgba(0, 229, 159, 0.05);
     max-width: 100%;
+    touch-action: auto;
   }
 
   .b4e-widget * {
@@ -126,7 +127,8 @@ const WIDGET_STYLES = `
   }
 
   .b4e-body.open {
-    max-height: 2000px;
+    max-height: none;
+    overflow: visible;
   }
 
   .b4e-inner {
