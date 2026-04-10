@@ -1,18 +1,21 @@
 // before Content Script - Kalshi
 // Extracts market title and injects inline B4E widget on Kalshi
 // URL patterns:
-//   /markets/{series}/{event}/{ticker}
-//   /markets/{series}/{event}
-//   /events/{event}
+//   Market page:   /markets/{series}/{event}/{ticker}  (4 segments - show widget)
+//   Category page: /markets/{series}/{event}           (3 segments - skip)
+//   Event page:    /markets/{series}                   (2 segments - skip)
+//   Homepage:      /markets                            (1 segment  - skip)
+
+function isMarketPage() {
+  const pathParts = window.location.pathname.split('/').filter(Boolean);
+  // Must be /markets/{series}/{event}/{ticker} - exactly 4 segments
+  return pathParts[0] === 'markets' && pathParts.length >= 4;
+}
 
 function getKalshiTicker() {
-  // Extract ticker from URL: /markets/kxpgatour/pga-tour/kxpgatour-mast26
   const pathParts = window.location.pathname.split('/').filter(Boolean);
-  if (pathParts[0] === 'markets' && pathParts.length >= 3) {
-    return pathParts[pathParts.length - 1]; // last segment is the ticker
-  }
-  if (pathParts[0] === 'events' && pathParts.length >= 2) {
-    return pathParts[1];
+  if (pathParts[0] === 'markets' && pathParts.length >= 4) {
+    return pathParts[3]; // the ticker is the 4th segment
   }
   return null;
 }
@@ -116,11 +119,13 @@ function findAnchor() {
 }
 
 function waitAndInject(attempts = 0) {
+  // Only inject on individual market pages, not category/event listing pages
+  if (!isMarketPage()) return;
+
   const title = getMarketTitle();
   const anchor = findAnchor();
 
   if (title && anchor && window.__b4e) {
-    // Pass the Kalshi ticker as extra context for better market matching
     const ticker = getKalshiTicker();
     window.__b4e.injectB4EWidget(anchor, title, 'kalshi', { ticker, platform: 'kalshi' });
     return;
@@ -152,6 +157,10 @@ waitAndInject();
 // Popup backward compat
 chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
   if (request.action === 'getMarketInfo') {
+    if (!isMarketPage()) {
+      sendResponse(null);
+      return;
+    }
     const title = getMarketTitle();
     if (title) {
       sendResponse({ platform: 'kalshi', title, url: getMarketUrl(), ticker: getKalshiTicker() });

@@ -71,8 +71,15 @@ function findAnchor() {
   return null;
 }
 
+// Polymarket market pages have /event/ in the URL
+function isMarketPage() {
+  return /\/(event|market)\//i.test(window.location.pathname);
+}
+
 // Wait for DOM to be ready, then inject widget
 function waitAndInject(attempts = 0) {
+  if (!isMarketPage()) return;
+
   const title = getMarketTitle();
   const anchor = findAnchor();
 
