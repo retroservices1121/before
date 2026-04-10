@@ -71,11 +71,26 @@ function getMarketUrl() {
 }
 
 function findAnchor() {
-  // Try h1 first
+  // DFlow: find the buy/sell card by looking for its distinctive button
+  const tradeBtns = document.querySelectorAll('button.bg-grey-700, button[class*="bg-green"], button[class*="bg-red"], button[class*="rounded-2xl"]');
+  for (const btn of tradeBtns) {
+    // Walk up to find the card container
+    let container = btn.closest('[class*="rounded"]');
+    if (container && container !== btn) return container;
+    // Try parent with mt-3 or similar card wrapper
+    let parent = btn.parentElement;
+    for (let i = 0; i < 5 && parent; i++) {
+      if (parent.children.length >= 2 || parent.classList.contains('mt-3')) {
+        return parent;
+      }
+      parent = parent.parentElement;
+    }
+  }
+
+  // Try h1 as fallback
   const h1 = document.querySelector('h1');
   if (h1) return h1;
 
-  // Try heading patterns
   const selectors = [
     '[data-testid="market-title"]',
     '[class*="MarketTitle"]',
@@ -90,13 +105,6 @@ function findAnchor() {
     if (el) return el;
   }
 
-  // Try main content headings
-  const candidates = document.querySelectorAll('main h1, main h2, main h3, [role="main"] h1, [role="main"] h2');
-  for (const el of candidates) {
-    return el;
-  }
-
-  // Fallback: first substantial text block in main or body
   const mainEl = document.querySelector('main') || document.querySelector('[role="main"]');
   if (mainEl) return mainEl;
 
