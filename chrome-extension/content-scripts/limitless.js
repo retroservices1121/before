@@ -89,14 +89,13 @@ function waitAndInject(attempts = 0) {
   if (!isMarketPage()) return;
 
   const title = getMarketTitle();
-  const anchor = findAnchor();
 
-  if (title && anchor && window.__b4e) {
-    window.__b4e.injectB4EWidget(anchor, title, 'limitless');
+  if (title && window.__b4e) {
+    window.__b4e.injectB4EWidget(null, title, 'limitless');
     return;
   }
 
-  if (attempts < 30) {
+  if (attempts < 60) {
     setTimeout(() => waitAndInject(attempts + 1), 500);
   }
 }

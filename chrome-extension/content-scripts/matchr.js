@@ -67,8 +67,8 @@ function waitAndInject(attempts = 0) {
   const title = getMarketTitle();
   const anchor = findAnchor();
 
-  if (title && anchor && window.__b4e) {
-    window.__b4e.injectB4EWidget(anchor, title, 'matchr');
+  if (title && window.__b4e) {
+    window.__b4e.injectB4EWidget(null, title, 'matchr');
     return;
   }
 

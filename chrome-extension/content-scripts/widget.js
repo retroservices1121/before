@@ -680,12 +680,12 @@ async function fetchBrief(title, extra, refresh) {
 }
 
 // Main entry point - called by platform content scripts
-// anchorEl: DOM element to inject the widget after
+// anchorEl: ignored (widget is now a fixed overlay appended to body)
 // title: market title string
 // platform: platform identifier for attribution (e.g., 'polymarket', 'dflow')
 // extra: optional object with { ticker, platform } for better market matching
 async function injectB4EWidget(anchorEl, title, platform, extra) {
-  if (!anchorEl || !title) return;
+  if (!title) return;
 
   // Don't inject twice
   if (document.getElementById('b4e-inline-widget')) return;

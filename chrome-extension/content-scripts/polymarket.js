@@ -112,11 +112,11 @@ function waitAndInject(attempts = 0) {
   if (!isMarketPage()) return;
 
   const title = getMarketTitle();
-  const anchor = findAnchor();
+  
 
-  if (title && anchor && window.__b4e) {
+  if (title && window.__b4e) {
     const slug = getPolymarketSlug();
-    window.__b4e.injectB4EWidget(anchor, title, 'polymarket', { slug, platform: 'polymarket' });
+    window.__b4e.injectB4EWidget(null, title, 'polymarket', { slug, platform: 'polymarket' });
     return;
   }
 
