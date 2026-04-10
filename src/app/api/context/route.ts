@@ -40,8 +40,10 @@ export async function OPTIONS() {
 export async function GET(request: NextRequest) {
   const slug = request.nextUrl.searchParams.get('slug');
   const title = request.nextUrl.searchParams.get('title');
+  const ticker = request.nextUrl.searchParams.get('ticker');
+  const platform = request.nextUrl.searchParams.get('platform');
 
-  if (!slug && !title) {
+  if (!slug && !title && !ticker) {
     return NextResponse.json(
       { error: 'Missing slug or title parameter' },
       { status: 400, headers: CORS_HEADERS }
@@ -94,9 +96,15 @@ export async function GET(request: NextRequest) {
     );
   }
 
-  // Try to find the market: slug lookup first, then title search
+  // Try to find the market using all available signals
   let market = slug ? await getMarket(slug) : null;
 
+  // Try direct Spredd lookup by platform + ticker (e.g., kalshi/kxpgatour-mast26)
+  if (!market && ticker && platform) {
+    market = await getMarket(`--${platform}--${encodeURIComponent(ticker)}`);
+  }
+
+  // Try searching by title
   if (!market && title) {
     const results = await searchMarkets(title);
     if (results && results.length > 0) {
@@ -104,8 +112,16 @@ export async function GET(request: NextRequest) {
     }
   }
 
+  // Try searching by ticker as keywords
+  if (!market && ticker) {
+    const results = await searchMarkets(ticker.replace(/[-_]/g, ' '));
+    if (results && results.length > 0) {
+      market = results[0];
+    }
+  }
+
+  // Try searching with slug as keywords
   if (!market && slug && !title) {
-    // Try searching with the slug as keywords
     const searchTerm = slug.replace(/-/g, ' ');
     const results = await searchMarkets(searchTerm);
     if (results && results.length > 0) {

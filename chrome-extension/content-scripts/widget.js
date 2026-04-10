@@ -563,9 +563,15 @@ function escapeHtml(str) {
 }
 
 // Fetch brief from B4E API
-async function fetchBrief(title) {
+async function fetchBrief(title, extra) {
   const slug = slugify(title);
-  const url = `${B4E_API}/api/context?slug=${encodeURIComponent(slug)}&title=${encodeURIComponent(title)}`;
+  let url = `${B4E_API}/api/context?slug=${encodeURIComponent(slug)}&title=${encodeURIComponent(title)}`;
+
+  // Pass extra context for better matching
+  if (extra) {
+    if (extra.ticker) url += `&ticker=${encodeURIComponent(extra.ticker)}`;
+    if (extra.platform) url += `&platform=${encodeURIComponent(extra.platform)}`;
+  }
 
   // Check for stored API key
   const stored = await chrome.storage.sync.get(['b4eApiKey']);
@@ -597,13 +603,18 @@ async function fetchBrief(title) {
 // anchorEl: DOM element to inject the widget after
 // title: market title string
 // platform: platform identifier for attribution (e.g., 'polymarket', 'dflow')
-async function injectB4EWidget(anchorEl, title, platform) {
+// extra: optional object with { ticker, platform } for better market matching
+async function injectB4EWidget(anchorEl, title, platform, extra) {
   if (!anchorEl || !title) return;
 
   // Don't inject twice
   if (document.getElementById('b4e-inline-widget')) return;
 
   injectStyles();
+
+  // Delay theme detection slightly so SPAs have time to apply their styles
+  await new Promise((r) => setTimeout(r, 200));
+
   const widget = createWidget();
   anchorEl.parentNode.insertBefore(widget, anchorEl.nextSibling);
 
@@ -616,7 +627,7 @@ async function injectB4EWidget(anchorEl, title, platform) {
   // Fetch and render
   async function loadBrief() {
     try {
-      const brief = await fetchBrief(title);
+      const brief = await fetchBrief(title, extra);
       renderBrief(widget, brief, platform);
     } catch (err) {
       if (err.rateLimited) {
