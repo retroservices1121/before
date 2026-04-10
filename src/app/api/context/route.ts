@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createHash } from 'crypto';
-import { getMarket, searchMarkets } from '@/lib/spredd';
+import { getMarket, searchMarkets, getPolymarketBySlug } from '@/lib/spredd';
 import { generateContextBrief } from '@/lib/ai';
 import { getSession } from '@/lib/auth';
 import { checkRateLimit, recordUsage, BETA_MODE } from '@/lib/rate-limit';
@@ -100,7 +100,11 @@ export async function GET(request: NextRequest) {
   // Try to find the market using all available signals
   let market = slug ? await getMarket(slug) : null;
 
-  // Try Polymarket event slug (e.g., "nba-det-cha-2026-04-10")
+  // Try Polymarket event slug directly via Polymarket API
+  if (!market && eventSlug) {
+    market = await getPolymarketBySlug(eventSlug);
+  }
+  // Also try searching Spredd by event slug keywords
   if (!market && eventSlug) {
     const results = await searchMarkets(eventSlug.replace(/-/g, ' '));
     if (results && results.length > 0) {

@@ -142,6 +142,49 @@ export async function searchMarkets(query: string): Promise<Market[]> {
   return mocks.filter((m) => m.title.toLowerCase().includes(lower));
 }
 
+/**
+ * Direct Polymarket API fallback for markets not found in Spredd.
+ * Uses Polymarket's gamma API to resolve event slugs directly.
+ */
+export async function getPolymarketBySlug(eventSlug: string): Promise<Market | null> {
+  try {
+    const res = await fetch(
+      `https://gamma-api.polymarket.com/events?slug=${encodeURIComponent(eventSlug)}`,
+      { next: { revalidate: 60 } }
+    );
+
+    if (!res.ok) return null;
+
+    const events = await res.json();
+    if (!Array.isArray(events) || events.length === 0) return null;
+
+    const event = events[0];
+    // Get the first (primary) market from the event
+    const mkt = event.markets?.[0] || event;
+
+    const prices = mkt.outcomePrices ? JSON.parse(mkt.outcomePrices) : [];
+    const probability = prices.length > 0 ? parseFloat(prices[0]) : 0;
+
+    return {
+      id: `polymarket-${mkt.id || event.id}`,
+      slug: eventSlug,
+      title: event.title || mkt.title || eventSlug,
+      description: event.description || mkt.description,
+      probability,
+      volume: parseFloat(mkt.volume || event.volume || '0'),
+      volume24h: parseFloat(mkt.volume24hr || '0'),
+      platform: 'polymarket',
+      category: event.category || undefined,
+      endDate: mkt.endDate || event.endDate,
+      url: `https://polymarket.com/event/${eventSlug}`,
+      conditionId: mkt.conditionId || undefined,
+    };
+  } catch (error) {
+    console.error('Polymarket direct lookup failed:', error);
+    return null;
+  }
+}
+
 export async function getMarketNews(platform: string, marketId: string) {
   return spreddFetch<{ title: string; url: string; source: string }[]>(
     `/v1/news/market/${platform}/${marketId}`
