@@ -44,6 +44,25 @@ function getMarketUrl() {
 }
 
 function findAnchor() {
+  // Limitless uses Chakra UI - find the trade card by looking for
+  // the "Set to 1 USDC" button or trade-related elements
+  const buttons = document.querySelectorAll('button.chakra-button');
+  for (const btn of buttons) {
+    const text = btn.textContent || '';
+    if (text.includes('USDC') || text.includes('Buy') || text.includes('Sell')) {
+      // Walk up to find the trade card container
+      let parent = btn.parentElement;
+      for (let i = 0; i < 6 && parent; i++) {
+        // Look for a container that has the trade form elements
+        if (parent.querySelector('[class*="chakra-stack"]') && parent.children.length >= 2) {
+          return parent;
+        }
+        parent = parent.parentElement;
+      }
+    }
+  }
+
+  // Fallback to h1
   const h1 = document.querySelector('h1');
   if (h1) return h1;
 
