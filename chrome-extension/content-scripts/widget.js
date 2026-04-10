@@ -57,6 +57,8 @@ const WIDGET_STYLES = `
 
   .b4e-widget, .b4e-widget * {
     overscroll-behavior: auto;
+    transform: none !important;
+    zoom: 1 !important;
   }
 
   /* Header bar - always visible */
@@ -450,6 +452,14 @@ function createWidget() {
       </div>
     </div>
   `;
+
+  // Prevent wheel/touch events from propagating to the host page
+  // This stops Polymarket and other SPAs from intercepting scroll/zoom
+  widget.addEventListener('wheel', (e) => e.stopPropagation(), { passive: true });
+  widget.addEventListener('touchstart', (e) => e.stopPropagation(), { passive: true });
+  widget.addEventListener('touchmove', (e) => e.stopPropagation(), { passive: true });
+  widget.addEventListener('gesturestart', (e) => e.stopPropagation());
+  widget.addEventListener('gesturechange', (e) => e.stopPropagation());
 
   // Toggle collapse
   const header = widget.querySelector('.b4e-header');
