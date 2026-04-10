@@ -71,10 +71,17 @@ function findAnchor() {
   return null;
 }
 
-// Polymarket market pages: /event/{slug} with a slug segment
-// Skip: /, /markets, /browse, /portfolio, /activity, etc.
+// Polymarket market pages:
+//   /event/{slug}
+//   /sports/{sport}/{slug}
+// Skip: /, /markets, /browse, /portfolio, /activity, /sports (listing), /sports/{sport} (category)
 function isMarketPage() {
-  return /^\/event\/[^/]+/i.test(window.location.pathname);
+  const path = window.location.pathname;
+  // /event/{slug}
+  if (/^\/event\/[^/]+/.test(path)) return true;
+  // /sports/{sport}/{slug} - needs 3 segments minimum
+  if (/^\/sports\/[^/]+\/[^/]+/.test(path)) return true;
+  return false;
 }
 
 // Wait for DOM to be ready, then inject widget
