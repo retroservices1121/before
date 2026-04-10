@@ -56,16 +56,25 @@ export async function generateContextBrief(market: Market): Promise<ContextBrief
     ? ''
     : `\nIMPORTANT: No live news data was available. Do NOT fabricate or assume facts about recent events, election results, who holds office, or outcomes you are uncertain about. Focus on structural factors, historical patterns, and the market data provided. If you are unsure who won a past election or what happened recently, say "based on market pricing" instead of guessing.`;
 
+  const hasMarketData = market.volume > 0 || market.probability > 0;
+  const marketDataLine = hasMarketData
+    ? `Probability: ${(market.probability * 100).toFixed(1)}% | Volume: $${market.volume.toLocaleString()} | Platform: ${market.platform}`
+    : `Platform: ${market.platform} (No market data available — analyze based on the event itself)`;
+  const statsLine = [
+    market.endDate ? `Resolves: ${market.endDate}` : '',
+    hasMarketData && market.priceChange24h ? `24h: ${market.priceChange24h > 0 ? '+' : ''}${market.priceChange24h}%` : '',
+  ].filter(Boolean).join(' | ');
+
   const prompt = `Generate a prediction market context brief. Be concise, specific, analyst-grade.
 
 Today's date: ${today}${confidenceWarning}
 
 Market: ${market.title}
-Probability: ${(market.probability * 100).toFixed(1)}% | Volume: $${market.volume.toLocaleString()} | Platform: ${market.platform}
-${market.endDate ? `Resolves: ${market.endDate}` : ''}${market.priceChange24h ? ` | 24h: ${market.priceChange24h > 0 ? '+' : ''}${market.priceChange24h}%` : ''}${newsBlock}${cryptoBlock}
+${marketDataLine}
+${statsLine}${newsBlock}${cryptoBlock}
 
 JSON response:
-{"summary":"2-3 sentences on WHY probability is here. Reference specific events/data. Do not assume or fabricate political outcomes.","keyFactors":[{"name":"Factor","sentiment":"bullish|bearish|neutral","detail":"One sentence"}],"historicalBaseRate":"One sentence on precedent.","upcomingCatalysts":["FUTURE event/date after ${today} that could move this market"]}
+{"summary":"2-3 sentences analyzing this market/event. ${hasMarketData ? 'Explain WHY probability is here.' : 'Analyze the likely outcome based on available information.'} Do not assume or fabricate political outcomes.","keyFactors":[{"name":"Factor","sentiment":"bullish|bearish|neutral","detail":"One sentence"}],"historicalBaseRate":"One sentence on precedent.","upcomingCatalysts":["FUTURE event/date after ${today} that could move this market"]}
 
 3-5 factors, 2-3 catalysts. All catalysts MUST be in the future (after ${today}). No hedging. Write like a research analyst.`;
 
