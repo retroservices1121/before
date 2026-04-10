@@ -188,48 +188,91 @@
     return null;
   }
 
-  // --- Build widget ---
+  // --- Build widget inside an iframe for full isolation ---
   function createWidget() {
-    var widget = document.createElement('div');
-    widget.className = 'b4e-embed';
-    widget.id = 'b4e-embed-widget';
+    var container = document.createElement('div');
+    container.id = 'b4e-embed-widget';
+    container.style.cssText = 'margin:16px 0;max-width:100%;';
 
-    widget.innerHTML = '\
-      <div class="b4e-e-header">\
-        <div class="b4e-e-left">\
-          <span class="b4e-e-pulse"></span>\
-          <span class="b4e-e-logo">before</span>\
-          <span class="b4e-e-tag">Intelligence Brief</span>\
-        </div>\
-        <span class="b4e-e-toggle">\u25BC</span>\
-      </div>\
-      <div class="b4e-e-body">\
-        <div class="b4e-e-loading">\
-          <div class="b4e-e-spinner"></div>\
-          <span class="b4e-e-loading-text">Generating context brief...</span>\
-        </div>\
-      </div>\
-    ';
+    var iframe = document.createElement('iframe');
+    iframe.style.cssText = 'width:100%;border:none;overflow:hidden;display:block;min-height:44px;';
+    iframe.setAttribute('scrolling', 'no');
+    iframe.setAttribute('title', 'before Intelligence Brief');
 
-    var header = widget.querySelector('.b4e-e-header');
-    var body = widget.querySelector('.b4e-e-body');
-    var toggle = widget.querySelector('.b4e-e-toggle');
+    container.appendChild(iframe);
 
-    header.addEventListener('click', function () {
-      body.classList.toggle('open');
-      toggle.classList.toggle('open');
-    });
+    // Write the iframe content after it's in the DOM
+    container._iframe = iframe;
+    container._ready = false;
 
-    if (!config.collapsed) {
-      body.classList.add('open');
-      toggle.classList.add('open');
-    }
+    container._initIframe = function () {
+      if (container._ready) return;
+      container._ready = true;
 
-    return widget;
+      var doc = iframe.contentDocument || iframe.contentWindow.document;
+      var collapsed = config.collapsed;
+
+      doc.open();
+      doc.write('<!DOCTYPE html><html><head><style>' +
+        'html,body{margin:0;padding:0;overflow:hidden;background:transparent;}' +
+        STYLES +
+        '.b4e-embed{margin:0;}' +
+        '.b4e-e-body.open{display:block;}' +
+        '.b4e-e-body{display:none;}' +
+        '</style></head><body>' +
+        '<div class="b4e-embed">' +
+        '<div class="b4e-e-header">' +
+        '<div class="b4e-e-left">' +
+        '<span class="b4e-e-pulse"></span>' +
+        '<span class="b4e-e-logo">before</span>' +
+        '<span class="b4e-e-tag">Intelligence Brief</span>' +
+        '</div>' +
+        '<span class="b4e-e-toggle">\u25BC</span>' +
+        '</div>' +
+        '<div class="b4e-e-body' + (collapsed ? '' : ' open') + '">' +
+        '<div class="b4e-e-loading">' +
+        '<div class="b4e-e-spinner"></div>' +
+        '<span class="b4e-e-loading-text">Generating context brief...</span>' +
+        '</div>' +
+        '</div>' +
+        '</div>' +
+        '</body></html>');
+      doc.close();
+
+      // Auto-resize iframe to fit content
+      function resizeIframe() {
+        try {
+          var h = doc.documentElement.scrollHeight;
+          iframe.style.height = h + 'px';
+        } catch (e) {}
+      }
+
+      // Toggle collapse
+      var header = doc.querySelector('.b4e-e-header');
+      var body = doc.querySelector('.b4e-e-body');
+      var toggle = doc.querySelector('.b4e-e-toggle');
+
+      header.addEventListener('click', function () {
+        body.classList.toggle('open');
+        toggle.classList.toggle('open');
+        setTimeout(resizeIframe, 10);
+      });
+
+      // Observe content changes to auto-resize
+      var ro = new ResizeObserver(resizeIframe);
+      ro.observe(doc.body);
+      resizeIframe();
+
+      // Store refs for render functions
+      container._doc = doc;
+      container._resize = resizeIframe;
+    };
+
+    return container;
   }
 
   function renderBrief(widget, brief, slug) {
-    var body = widget.querySelector('.b4e-e-body');
+    var body = widget._doc.querySelector('.b4e-e-body');
     var html = '<div class="b4e-e-inner">';
 
     if (brief.summary) {
@@ -298,19 +341,22 @@
     html += '<div class="b4e-e-powered">Powered by <a href="' + B4E_HOST + '" target="_blank">before</a> \u2014 Know before it matters</div>';
 
     body.innerHTML = html;
+    if (widget._resize) setTimeout(widget._resize, 10);
   }
 
   function renderError(widget, message, retryFn) {
-    var body = widget.querySelector('.b4e-e-body');
+    var body = widget._doc.querySelector('.b4e-e-body');
     body.innerHTML = '<div class="b4e-e-error">\
       <div class="b4e-e-error-text">' + esc(message) + '</div>\
       <button class="b4e-e-retry">Retry</button>\
     </div>';
     body.querySelector('.b4e-e-retry').addEventListener('click', retryFn);
+    if (widget._resize) setTimeout(widget._resize, 10);
   }
 
   function renderRateLimit(widget, message, reloadFn) {
-    var body = widget.querySelector('.b4e-e-body');
+    var doc = widget._doc;
+    var body = doc.querySelector('.b4e-e-body');
     var savedEmail = '';
     try { savedEmail = localStorage.getItem(STORAGE_EMAIL) || ''; } catch (e) {}
 
@@ -320,6 +366,7 @@
         <div class="b4e-e-ratelimit-text">' + esc(message || 'Beta limit: 2 free briefs per day') + '</div>\
         <span class="b4e-e-upgrade" style="cursor:default">Come back tomorrow</span>\
       </div>';
+      if (widget._resize) setTimeout(widget._resize, 10);
       return;
     }
 
@@ -344,6 +391,8 @@
         </div>\
       </div>\
     </div>';
+
+    if (widget._resize) setTimeout(widget._resize, 10);
 
     var emailInput = body.querySelector('#b4e-auth-email');
     var sendBtn = body.querySelector('#b4e-auth-send');
@@ -468,15 +517,7 @@
 
     var slug = config.slug || slugify(title);
 
-    // Inject styles
-    if (!document.getElementById('b4e-embed-styles')) {
-      var style = document.createElement('style');
-      style.id = 'b4e-embed-styles';
-      style.textContent = STYLES;
-      document.head.appendChild(style);
-    }
-
-    // Create and insert widget
+    // Create and insert widget (iframe-based)
     var widget = createWidget();
     if (config.position === 'before') {
       target.parentNode.insertBefore(widget, target);
@@ -484,22 +525,28 @@
       target.parentNode.insertBefore(widget, target.nextSibling);
     }
 
-    // Fetch and render
-    function loadBrief() {
-      fetchBrief(slug, function (err, brief) {
-        if (err) {
-          if (err.rateLimited) {
-            renderRateLimit(widget, err.message, loadBrief);
-          } else {
-            renderError(widget, err.message, loadBrief);
-          }
-          return;
-        }
-        renderBrief(widget, brief, slug);
-      });
-    }
+    // Initialize iframe content after it's in the DOM
+    // Small delay to ensure iframe is ready
+    setTimeout(function () {
+      widget._initIframe();
 
-    loadBrief();
+      // Fetch and render
+      function loadBrief() {
+        fetchBrief(slug, function (err, brief) {
+          if (err) {
+            if (err.rateLimited) {
+              renderRateLimit(widget, err.message, loadBrief);
+            } else {
+              renderError(widget, err.message, loadBrief);
+            }
+            return;
+          }
+          renderBrief(widget, brief, slug);
+        });
+      }
+
+      loadBrief();
+    }, 100);
   }
 
   // Wait for DOM
@@ -549,13 +596,6 @@
 
       if (document.getElementById(widgetId)) return;
 
-      if (!document.getElementById('b4e-embed-styles')) {
-        var style = document.createElement('style');
-        style.id = 'b4e-embed-styles';
-        style.textContent = STYLES;
-        document.head.appendChild(style);
-      }
-
       var widget = createWidget();
       widget.id = widgetId;
 
@@ -565,21 +605,25 @@
         opts.target.parentNode.insertBefore(widget, opts.target.nextSibling);
       }
 
-      function loadBrief() {
-        fetchBrief(slug, function (err, brief) {
-          if (err) {
-            if (err.rateLimited) {
-              renderRateLimit(widget, err.message, loadBrief);
-            } else {
-              renderError(widget, err.message, loadBrief);
-            }
-            return;
-          }
-          renderBrief(widget, brief, slug);
-        });
-      }
+      setTimeout(function () {
+        widget._initIframe();
 
-      loadBrief();
+        function loadBrief() {
+          fetchBrief(slug, function (err, brief) {
+            if (err) {
+              if (err.rateLimited) {
+                renderRateLimit(widget, err.message, loadBrief);
+              } else {
+                renderError(widget, err.message, loadBrief);
+              }
+              return;
+            }
+            renderBrief(widget, brief, slug);
+          });
+        }
+
+        loadBrief();
+      }, 100);
     },
   };
 })();
