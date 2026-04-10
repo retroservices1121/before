@@ -15,9 +15,21 @@ function getTickerFromUrl() {
 }
 
 function getMarketTitle() {
-  // Try h1 first
+  // Try document.title first - set early by the SPA, before DOM renders
+  const pageTitle = document.title.replace(/\s*[-|]\s*DFlow\s*$/i, '').trim();
+  if (pageTitle && pageTitle.length > 5 && pageTitle !== 'DFlow' && !pageTitle.includes('Intelligent Trade')) {
+    return pageTitle;
+  }
+
+  // Try og:title meta tag
+  const ogTitle = document.querySelector('meta[property="og:title"]');
+  if (ogTitle && ogTitle.content && ogTitle.content.length > 5) {
+    return ogTitle.content.replace(/\s*[-|]\s*DFlow\s*$/i, '').trim();
+  }
+
+  // Try h1
   const h1 = document.querySelector('h1');
-  if (h1 && h1.textContent.trim().length > 3) {
+  if (h1 && h1.textContent.trim().length > 5) {
     return h1.textContent.trim();
   }
 
@@ -31,37 +43,23 @@ function getMarketTitle() {
     '[class*="prediction"]',
     'h2',
     'h3',
+    'h4',
   ];
   for (const sel of selectors) {
     const el = document.querySelector(sel);
-    if (el && el.textContent.trim().length > 3) {
+    if (el && el.textContent.trim().length > 5) {
       return el.textContent.trim();
     }
   }
 
   // Try the largest text element in the main content area
-  const candidates = document.querySelectorAll('main h1, main h2, main h3, [role="main"] h1, [role="main"] h2');
+  const candidates = document.querySelectorAll('main h1, main h2, main h3, main h4, [role="main"] h1, [role="main"] h2');
   for (const el of candidates) {
-    if (el.textContent.trim().length > 3) {
+    if (el.textContent.trim().length > 5) {
       return el.textContent.trim();
     }
   }
 
-  // Try og:title meta tag
-  const ogTitle = document.querySelector('meta[property="og:title"]');
-  if (ogTitle && ogTitle.content) {
-    return ogTitle.content.replace(/\s*[-|]\s*DFlow\s*$/i, '').trim();
-  }
-
-  // Try document title
-  const pageTitle = document.title.replace(/\s*[-|]\s*DFlow\s*$/i, '').trim();
-  if (pageTitle && pageTitle.length > 3) {
-    return pageTitle;
-  }
-
-  // Do NOT fall back to the ticker as a title - it produces meaningless
-  // strings like "Kxpresnomr 28" that match the wrong market in search.
-  // Return null so waitAndInject keeps retrying until the real title renders.
   return null;
 }
 
