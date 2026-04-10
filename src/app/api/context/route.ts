@@ -104,52 +104,57 @@ export async function GET(request: NextRequest) {
   // Try to find the market using all available signals
   let market = null;
 
-  // 1. Direct Spredd lookup by platform + ticker (most precise)
   if (ticker && platform) {
+    // TICKER PATH: direct lookups only, no fuzzy search
+    // 1a. Spredd by platform + ticker
     market = await getMarket(`--${platform}--${encodeURIComponent(ticker)}`);
     if (!market) {
       market = await getMarket(`--${platform}--${encodeURIComponent(ticker.toLowerCase())}`);
     }
-    // 1b. Try DFlow's own API (for Kalshi markets tokenized on Solana)
+    // 1b. DFlow API (for Kalshi markets on Solana)
     if (!market) {
       market = await getDFlowMarket(ticker);
     }
-  }
+    // 1c. If all ticker lookups fail, go straight to synthetic market.
+    // Do NOT search Spredd by keywords - ticker searches return wrong results.
+  } else {
+    // NON-TICKER PATH: slug, platform API, and search fallbacks
 
-  // 2. Direct slug lookup
-  if (!market && slug) {
-    market = await getMarket(slug);
-  }
-
-  // 3. Platform-specific API lookups by slug
-  if (!market && eventSlug) {
-    if (platform === 'limitless') {
-      market = await getLimitlessMarket(eventSlug);
-    } else {
-      market = await getPolymarketBySlug(eventSlug);
+    // 2. Direct slug lookup via Spredd
+    if (slug) {
+      market = await getMarket(slug);
     }
-  }
 
-  // 3b. Limitless search by title
-  if (!market && title && platform === 'limitless') {
-    const results = await searchLimitlessMarkets(title);
-    if (results.length > 0) market = results[0];
-  }
-
-  // 4. Search by title (only if no ticker - ticker markets use synthetic fallback)
-  if (!market && title && !ticker) {
-    const results = await searchMarkets(title);
-    if (results && results.length > 0) {
-      market = results[0];
+    // 3. Platform-specific API lookups by slug
+    if (!market && eventSlug) {
+      if (platform === 'limitless') {
+        market = await getLimitlessMarket(eventSlug);
+      } else {
+        market = await getPolymarketBySlug(eventSlug);
+      }
     }
-  }
 
-  // 5. Search by slug keywords (only if no title and no ticker)
-  if (!market && slug && !title && !ticker) {
-    const searchTerm = slug.replace(/-/g, ' ');
-    const results = await searchMarkets(searchTerm);
-    if (results && results.length > 0) {
-      market = results[0];
+    // 3b. Limitless search by title
+    if (!market && title && platform === 'limitless') {
+      const results = await searchLimitlessMarkets(title);
+      if (results.length > 0) market = results[0];
+    }
+
+    // 4. Spredd search by title
+    if (!market && title) {
+      const results = await searchMarkets(title);
+      if (results && results.length > 0) {
+        market = results[0];
+      }
+    }
+
+    // 5. Spredd search by slug keywords
+    if (!market && slug && !title) {
+      const searchTerm = slug.replace(/-/g, ' ');
+      const results = await searchMarkets(searchTerm);
+      if (results && results.length > 0) {
+        market = results[0];
+      }
     }
   }
 
