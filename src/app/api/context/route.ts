@@ -142,6 +142,22 @@ export async function GET(request: NextRequest) {
     }
   }
 
+  // If no market found in Spredd, create a synthetic market from available info
+  // and generate a brief anyway using Gemini + web context
+  if (!market && (title || slug)) {
+    const marketTitle = title || (slug ? slug.replace(/-/g, ' ') : 'Unknown Market');
+    market = {
+      id: `ext-${cacheKey}`,
+      slug: cacheKey,
+      title: marketTitle,
+      probability: 0,
+      volume: 0,
+      platform: (platform as any) || 'aggregate',
+      category: undefined,
+      url: undefined,
+    };
+  }
+
   if (!market) {
     return NextResponse.json(
       { error: 'Market not found' },
