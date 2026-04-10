@@ -14,7 +14,7 @@ const CORS_HEADERS = {
 };
 
 // In-memory brief cache — avoids re-running Gemini for the same market
-const CACHE_TTL = 30 * 60 * 1000; // 30 minutes
+const CACHE_TTL = 10 * 60 * 1000; // 10 minutes
 const briefCache = new Map<string, { brief: ContextBrief; cachedAt: number }>();
 
 function getCachedBrief(key: string): ContextBrief | null {
@@ -56,7 +56,8 @@ export async function GET(request: NextRequest) {
 
   // Check cache first — cached briefs are free, no usage counted
   if (refresh) {
-    briefCache.delete(cacheKey);
+    // Clear ALL cache entries to avoid stale briefs from old cache keys
+    briefCache.clear();
   }
   const cached = !refresh ? getCachedBrief(cacheKey) : null;
   if (cached) {
