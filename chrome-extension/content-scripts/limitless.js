@@ -85,13 +85,19 @@ function isMarketPage() {
   return /^\/markets\/[^/]+/i.test(window.location.pathname);
 }
 
+function getLimitlessSlug() {
+  const match = window.location.pathname.match(/^\/markets\/([^/?#]+)/);
+  return match ? match[1] : null;
+}
+
 function waitAndInject(attempts = 0) {
   if (!isMarketPage()) return;
 
   const title = getMarketTitle();
 
   if (title && window.__b4e) {
-    window.__b4e.injectB4EWidget(null, title, 'limitless');
+    const slug = getLimitlessSlug();
+    window.__b4e.injectB4EWidget(null, title, 'limitless', { slug, platform: 'limitless' });
     return;
   }
 

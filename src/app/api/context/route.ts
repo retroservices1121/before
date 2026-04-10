@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createHash } from 'crypto';
-import { getMarket, searchMarkets, getPolymarketBySlug, getDFlowMarket } from '@/lib/spredd';
+import { getMarket, searchMarkets, getPolymarketBySlug, getDFlowMarket, getLimitlessMarket, searchLimitlessMarkets } from '@/lib/spredd';
 import { generateContextBrief } from '@/lib/ai';
 import { getSession } from '@/lib/auth';
 import { checkRateLimit, recordUsage, BETA_MODE } from '@/lib/rate-limit';
@@ -121,9 +121,19 @@ export async function GET(request: NextRequest) {
     market = await getMarket(slug);
   }
 
-  // 3. Polymarket event slug via their API
+  // 3. Platform-specific API lookups by slug
   if (!market && eventSlug) {
-    market = await getPolymarketBySlug(eventSlug);
+    if (platform === 'limitless') {
+      market = await getLimitlessMarket(eventSlug);
+    } else {
+      market = await getPolymarketBySlug(eventSlug);
+    }
+  }
+
+  // 3b. Limitless search by title
+  if (!market && title && platform === 'limitless') {
+    const results = await searchLimitlessMarkets(title);
+    if (results.length > 0) market = results[0];
   }
 
   // 4. Search by title (only if no ticker - ticker markets use synthetic fallback)

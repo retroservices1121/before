@@ -189,6 +189,79 @@ export async function getPolymarketBySlug(eventSlug: string): Promise<Market | n
  * Direct DFlow API fallback for Kalshi markets tokenized on Solana.
  * DFlow tickers map 1:1 to Kalshi tickers.
  */
+/**
+ * Direct Limitless API fallback for markets not found in Spredd.
+ * Uses Limitless's REST API to resolve market slugs directly.
+ */
+export async function getLimitlessMarket(slug: string): Promise<Market | null> {
+  try {
+    const res = await fetch(
+      `https://api.limitless.exchange/markets/${encodeURIComponent(slug)}`,
+      { next: { revalidate: 60 } }
+    );
+
+    if (!res.ok) return null;
+
+    const data = await res.json();
+
+    const prices = data.prices || [];
+    const probability = prices.length > 0 ? parseFloat(prices[0]) : 0;
+
+    return {
+      id: `limitless-${data.address || slug}`,
+      slug: data.slug || slug,
+      title: data.title || slug,
+      description: data.description || undefined,
+      probability,
+      volume: parseFloat(data.volume || '0'),
+      volume24h: undefined,
+      platform: 'limitless',
+      category: data.categories?.[0]?.name || undefined,
+      endDate: data.expirationDate || undefined,
+      url: `https://limitless.exchange/markets/${data.slug || slug}`,
+    };
+  } catch (error) {
+    console.error('Limitless API lookup failed:', error);
+    return null;
+  }
+}
+
+/**
+ * Search Limitless markets by semantic similarity.
+ */
+export async function searchLimitlessMarkets(query: string): Promise<Market[]> {
+  try {
+    const res = await fetch(
+      `https://api.limitless.exchange/markets/search?query=${encodeURIComponent(query)}&limit=3`,
+      { next: { revalidate: 60 } }
+    );
+
+    if (!res.ok) return [];
+
+    const data = await res.json();
+    if (!Array.isArray(data)) return [];
+
+    return data.map((m: any) => {
+      const prices = m.prices || [];
+      return {
+        id: `limitless-${m.address || m.slug}`,
+        slug: m.slug || '',
+        title: m.title || '',
+        description: m.description || undefined,
+        probability: prices.length > 0 ? parseFloat(prices[0]) : 0,
+        volume: parseFloat(m.volume || '0'),
+        platform: 'limitless' as const,
+        category: m.categories?.[0]?.name || undefined,
+        endDate: m.expirationDate || undefined,
+        url: `https://limitless.exchange/markets/${m.slug}`,
+      };
+    });
+  } catch (error) {
+    console.error('Limitless search failed:', error);
+    return [];
+  }
+}
+
 export async function getDFlowMarket(ticker: string): Promise<Market | null> {
   const DFLOW_API = 'https://dev-prediction-markets-api.dflow.net';
   const apiKey = process.env.DFLOW_API_KEY || '';
