@@ -127,6 +127,21 @@ export async function getMarket(slug: string): Promise<Market | null> {
   return mocks.find((m) => m.slug === slug || m.slug.startsWith(parts[0])) || null;
 }
 
+export async function searchMarkets(query: string): Promise<Market[]> {
+  const data = await spreddFetch<SpreddMarket[]>(
+    `/v1/markets?search=${encodeURIComponent(query)}&limit=5`
+  );
+
+  if (data && Array.isArray(data)) {
+    return data.map(mapSpreddMarket);
+  }
+
+  // Fallback to mock
+  const mocks = getMockMarkets();
+  const lower = query.toLowerCase();
+  return mocks.filter((m) => m.title.toLowerCase().includes(lower));
+}
+
 export async function getMarketNews(platform: string, marketId: string) {
   return spreddFetch<{ title: string; url: string; source: string }[]>(
     `/v1/news/market/${platform}/${marketId}`

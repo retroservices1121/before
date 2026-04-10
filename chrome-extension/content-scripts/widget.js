@@ -522,7 +522,7 @@ function escapeHtml(str) {
 // Fetch brief from B4E API
 async function fetchBrief(title) {
   const slug = slugify(title);
-  const url = `${B4E_API}/api/context?slug=${encodeURIComponent(slug)}`;
+  const url = `${B4E_API}/api/context?slug=${encodeURIComponent(slug)}&title=${encodeURIComponent(title)}`;
 
   // Check for stored API key
   const stored = await chrome.storage.sync.get(['b4eApiKey']);

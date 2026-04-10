@@ -1,10 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createHash } from 'crypto';
-import { getMarket } from '@/lib/spredd';
+import { getMarket, searchMarkets } from '@/lib/spredd';
 import { generateContextBrief } from '@/lib/ai';
 import { getSession } from '@/lib/auth';
 import { checkRateLimit, recordUsage, BETA_MODE } from '@/lib/rate-limit';
 import { ContextBrief } from '@/lib/types';
+import { slugify } from '@/lib/utils';
 
 const CORS_HEADERS = {
   'Access-Control-Allow-Origin': '*',
@@ -38,16 +39,19 @@ export async function OPTIONS() {
 
 export async function GET(request: NextRequest) {
   const slug = request.nextUrl.searchParams.get('slug');
+  const title = request.nextUrl.searchParams.get('title');
 
-  if (!slug) {
+  if (!slug && !title) {
     return NextResponse.json(
-      { error: 'Missing slug parameter' },
+      { error: 'Missing slug or title parameter' },
       { status: 400, headers: CORS_HEADERS }
     );
   }
 
+  const cacheKey = slug || slugify(title || '');
+
   // Check cache first — cached briefs are free, no usage counted
-  const cached = getCachedBrief(slug);
+  const cached = getCachedBrief(cacheKey);
   if (cached) {
     return NextResponse.json(cached, {
       headers: {
@@ -90,7 +94,24 @@ export async function GET(request: NextRequest) {
     );
   }
 
-  const market = await getMarket(slug);
+  // Try to find the market: slug lookup first, then title search
+  let market = slug ? await getMarket(slug) : null;
+
+  if (!market && title) {
+    const results = await searchMarkets(title);
+    if (results && results.length > 0) {
+      market = results[0];
+    }
+  }
+
+  if (!market && slug && !title) {
+    // Try searching with the slug as keywords
+    const searchTerm = slug.replace(/-/g, ' ');
+    const results = await searchMarkets(searchTerm);
+    if (results && results.length > 0) {
+      market = results[0];
+    }
+  }
 
   if (!market) {
     return NextResponse.json(
@@ -103,7 +124,7 @@ export async function GET(request: NextRequest) {
 
   // Record usage and cache
   await recordUsage(userId);
-  briefCache.set(slug, { brief, cachedAt: Date.now() });
+  briefCache.set(cacheKey, { brief, cachedAt: Date.now() });
 
   const remaining = rateLimit.remaining - 1;
 
