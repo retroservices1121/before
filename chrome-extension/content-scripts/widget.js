@@ -625,29 +625,23 @@ function renderBrief(host, brief, platform, refreshFn) {
     html += '<div class="b4e-nudge">' + nudgeHtml + '</div>';
   }
 
-  // Build share image URL with brief data
-  const shareParams = new URLSearchParams({
-    title: brief.marketTitle || slug,
-    summary: brief.summary || '',
-    factors: JSON.stringify((brief.keyFactors || []).map(f => ({ name: f.name, sentiment: f.sentiment }))),
-    catalysts: JSON.stringify(brief.upcomingCatalysts || []),
-    baseRate: brief.historicalBaseRate || '',
-    platform: platform || '',
-  });
-  const shareImageUrl = `${B4E_API}/api/brief-image?${shareParams.toString()}`;
+  // Build share text (under 250 chars for X) + market URL
+  const marketUrl = `${B4E_API}/market/${slug}`;
+  const summaryShort = (brief.summary || '').slice(0, 180).replace(/\.\s+\S+$/, '.');
+  const shareText = `${summaryShort}\n\n${marketUrl}`;
 
   // Footer
   html += `
     <div class="b4e-footer" style="position:relative;">
       <span class="b4e-time">${brief.generatedAt ? timeAgo(brief.generatedAt) : ''}</span>
       <div style="display:flex;align-items:center;gap:10px;">
-        <button class="b4e-share" title="Share as image" data-share-url="${escapeHtml(shareImageUrl)}">&#x1F4F7;</button>
+        <button class="b4e-share" title="Share on X">&#x2197;</button>
         <button class="b4e-refresh" title="Refresh brief">&#x21bb;</button>
-        <a class="b4e-link" href="${B4E_API}/market/${slug}" target="_blank">
+        <a class="b4e-link" href="${marketUrl}" target="_blank">
           Open in before &rarr;
         </a>
       </div>
-      <span class="b4e-share-toast">Image copied!</span>
+      <span class="b4e-share-toast">Opening X...</span>
     </div>
   `;
 
@@ -659,25 +653,19 @@ function renderBrief(host, brief, platform, refreshFn) {
     refreshBtn.addEventListener('click', refreshFn);
   }
 
-  // Wire share button - fetches the image and copies to clipboard
+  // Wire share button - opens X with pre-filled text + market URL
+  // The market URL has OG meta tags so X renders the brief image as a card
   const shareBtn = body.querySelector('.b4e-share');
   const toast = body.querySelector('.b4e-share-toast');
   if (shareBtn) {
-    shareBtn.addEventListener('click', async () => {
-      const url = shareBtn.getAttribute('data-share-url');
-      try {
-        const res = await fetch(url);
-        const blob = await res.blob();
-        await navigator.clipboard.write([
-          new ClipboardItem({ 'image/png': blob })
-        ]);
-        if (toast) {
-          toast.classList.add('show');
-          setTimeout(() => toast.classList.remove('show'), 2000);
-        }
-      } catch (err) {
-        // Fallback: open image in new tab if clipboard fails
-        window.open(url, '_blank');
+    shareBtn.addEventListener('click', () => {
+      const text = `${summaryShort}`;
+      const url = marketUrl;
+      const xUrl = `https://x.com/intent/tweet?text=${encodeURIComponent(text)}&url=${encodeURIComponent(url)}`;
+      window.open(xUrl, '_blank', 'width=550,height=420');
+      if (toast) {
+        toast.classList.add('show');
+        setTimeout(() => toast.classList.remove('show'), 2000);
       }
     });
   }

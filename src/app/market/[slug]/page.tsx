@@ -1,5 +1,6 @@
 import { notFound } from 'next/navigation';
 import Link from 'next/link';
+import { Metadata } from 'next';
 import { getMarket } from '@/lib/spredd';
 import MarketBriefLoader from '@/components/MarketBriefLoader';
 import {
@@ -11,8 +12,38 @@ import {
 
 export const dynamic = 'force-dynamic';
 
+const APP_URL = process.env.NEXT_PUBLIC_APP_URL || 'https://b4enews.com';
+
 interface PageProps {
   params: { slug: string };
+}
+
+export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
+  const market = await getMarket(params.slug);
+  if (!market) return {};
+
+  const ogImageParams = new URLSearchParams({
+    title: market.title,
+    probability: formatProbability(market.probability),
+    platform: market.platform,
+  });
+  const ogImageUrl = `${APP_URL}/api/brief-image?${ogImageParams.toString()}`;
+
+  return {
+    title: `${market.title} — before`,
+    description: `AI intelligence brief for "${market.title}" at ${formatProbability(market.probability)} probability.`,
+    openGraph: {
+      title: market.title,
+      description: `${formatProbability(market.probability)} probability — AI intelligence brief by before`,
+      images: [{ url: ogImageUrl, width: 600, height: 630 }],
+    },
+    twitter: {
+      card: 'summary_large_image',
+      title: market.title,
+      description: `${formatProbability(market.probability)} probability — AI intelligence brief by before`,
+      images: [ogImageUrl],
+    },
+  };
 }
 
 export default async function MarketPage({ params }: PageProps) {
