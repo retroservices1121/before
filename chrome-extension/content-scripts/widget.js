@@ -625,23 +625,21 @@ function renderBrief(host, brief, platform, refreshFn) {
     html += '<div class="b4e-nudge">' + nudgeHtml + '</div>';
   }
 
-  // Build share text (under 250 chars for X) + market URL
-  const marketUrl = `${B4E_API}/market/${slug}`;
-  const summaryShort = (brief.summary || '').slice(0, 180).replace(/\.\s+\S+$/, '.');
-  const shareText = `${summaryShort}\n\n${marketUrl}`;
+  // Market URL for sharing (always use production domain)
+  const marketUrl = `https://b4enews.com/market/${slug}`;
 
   // Footer
   html += `
     <div class="b4e-footer" style="position:relative;">
       <span class="b4e-time">${brief.generatedAt ? timeAgo(brief.generatedAt) : ''}</span>
       <div style="display:flex;align-items:center;gap:10px;">
-        <button class="b4e-share" title="Share on X">&#x2197;</button>
+        <button class="b4e-share" title="Copy link">&#x1F517;</button>
         <button class="b4e-refresh" title="Refresh brief">&#x21bb;</button>
         <a class="b4e-link" href="${marketUrl}" target="_blank">
           Open in before &rarr;
         </a>
       </div>
-      <span class="b4e-share-toast">Opening X...</span>
+      <span class="b4e-share-toast">Link copied!</span>
     </div>
   `;
 
@@ -653,20 +651,17 @@ function renderBrief(host, brief, platform, refreshFn) {
     refreshBtn.addEventListener('click', refreshFn);
   }
 
-  // Wire share button - opens X with pre-filled text + market URL
-  // The market URL has OG meta tags so X renders the brief image as a card
+  // Wire share button - copy market URL to clipboard
   const shareBtn = body.querySelector('.b4e-share');
   const toast = body.querySelector('.b4e-share-toast');
   if (shareBtn) {
     shareBtn.addEventListener('click', () => {
-      const text = `${summaryShort}`;
-      const url = marketUrl;
-      const xUrl = `https://x.com/intent/tweet?text=${encodeURIComponent(text)}&url=${encodeURIComponent(url)}`;
-      window.open(xUrl, '_blank', 'width=550,height=420');
-      if (toast) {
-        toast.classList.add('show');
-        setTimeout(() => toast.classList.remove('show'), 2000);
-      }
+      navigator.clipboard.writeText(marketUrl).then(() => {
+        if (toast) {
+          toast.classList.add('show');
+          setTimeout(() => toast.classList.remove('show'), 2000);
+        }
+      });
     });
   }
 }

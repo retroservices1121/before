@@ -179,7 +179,7 @@ export default async function MarketPage({ params }: PageProps) {
             Before Intelligence Brief
           </span>
         </div>
-        <MarketBriefLoader slug={params.slug} />
+        <MarketBriefLoader slug={params.slug} title={market.title} platform={market.platform} />
       </div>
 
       {/* Trade link */}

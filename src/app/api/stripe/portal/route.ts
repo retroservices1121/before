@@ -3,7 +3,7 @@ import { getSession } from '@/lib/auth';
 import { getStripe } from '@/lib/stripe';
 import { db, initDb } from '@/lib/db';
 
-const APP_URL = process.env.NEXT_PUBLIC_APP_URL || 'https://before-production.up.railway.app';
+const APP_URL = process.env.NEXT_PUBLIC_APP_URL || 'https://b4enews.com';
 
 export async function POST(request: NextRequest) {
   const session = await getSession(request);

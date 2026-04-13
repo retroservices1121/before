@@ -51,7 +51,11 @@ export async function GET(request: NextRequest) {
     );
   }
 
-  const cacheKey = ticker ? `${platform || 'unknown'}:${ticker}` : (slug || slugify(title || ''));
+  const cacheKey = ticker
+    ? `${platform || 'unknown'}:${ticker}`
+    : (platform && title)
+      ? `${platform}:${slugify(title)}`
+      : (slug || slugify(title || ''));
   const refresh = request.nextUrl.searchParams.get('refresh') === '1';
 
   // Check cache first — cached briefs are free, no usage counted
@@ -121,8 +125,8 @@ export async function GET(request: NextRequest) {
   } else {
     // NON-TICKER PATH: slug, platform API, and search fallbacks
 
-    // 2. Direct slug lookup via Spredd
-    if (slug) {
+    // 2. Direct slug lookup via Spredd (only if slug has platform+id format)
+    if (slug && slug.includes('--')) {
       market = await getMarket(slug);
     }
 
@@ -141,7 +145,7 @@ export async function GET(request: NextRequest) {
       if (results.length > 0) market = results[0];
     }
 
-    // 4. Spredd search by title
+    // 4. Spredd search by title (more reliable than slug keywords)
     if (!market && title) {
       const results = await searchMarkets(title);
       if (results && results.length > 0) {
@@ -149,7 +153,7 @@ export async function GET(request: NextRequest) {
       }
     }
 
-    // 5. Spredd search by slug keywords
+    // 5. Spredd search by slug keywords (last resort, only when no title available)
     if (!market && slug && !title) {
       const searchTerm = slug.replace(/-/g, ' ');
       const results = await searchMarkets(searchTerm);

@@ -7,9 +7,11 @@ import PaywallGate from './PaywallGate';
 
 interface Props {
   slug: string;
+  title?: string;
+  platform?: string;
 }
 
-export default function MarketBriefLoader({ slug }: Props) {
+export default function MarketBriefLoader({ slug, title, platform }: Props) {
   const [brief, setBrief] = useState<ContextBrief | null>(null);
   const [loading, setLoading] = useState(true);
   const [rateLimited, setRateLimited] = useState<{
@@ -26,7 +28,10 @@ export default function MarketBriefLoader({ slug }: Props) {
       setRateLimited(null);
 
       try {
-        const res = await fetch(`/api/context?slug=${encodeURIComponent(slug)}`);
+        const params = new URLSearchParams({ slug });
+        if (title) params.set('title', title);
+        if (platform) params.set('platform', platform);
+        const res = await fetch(`/api/context?${params.toString()}`);
 
         if (res.status === 429) {
           const data = await res.json();
