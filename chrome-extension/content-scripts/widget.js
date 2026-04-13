@@ -328,6 +328,40 @@ const WIDGET_STYLES = `
     color: var(--b4e-accent);
   }
 
+  .b4e-share {
+    background: none;
+    border: none;
+    color: var(--b4e-muted);
+    font-size: 13px;
+    cursor: pointer;
+    padding: 0;
+    line-height: 1;
+    transition: color 0.2s;
+  }
+
+  .b4e-share:hover {
+    color: var(--b4e-accent);
+  }
+
+  .b4e-share-toast {
+    position: absolute;
+    bottom: 40px;
+    right: 14px;
+    background: var(--b4e-accent);
+    color: var(--b4e-bg);
+    font-family: monospace;
+    font-size: 10px;
+    padding: 4px 10px;
+    border-radius: 4px;
+    opacity: 0;
+    transition: opacity 0.3s;
+    pointer-events: none;
+  }
+
+  .b4e-share-toast.show {
+    opacity: 1;
+  }
+
   /* Rate limit */
   .b4e-ratelimit {
     padding: 16px 14px;
@@ -591,16 +625,29 @@ function renderBrief(host, brief, platform, refreshFn) {
     html += '<div class="b4e-nudge">' + nudgeHtml + '</div>';
   }
 
+  // Build share image URL with brief data
+  const shareParams = new URLSearchParams({
+    title: brief.marketTitle || slug,
+    summary: brief.summary || '',
+    factors: JSON.stringify((brief.keyFactors || []).map(f => ({ name: f.name, sentiment: f.sentiment }))),
+    catalysts: JSON.stringify(brief.upcomingCatalysts || []),
+    baseRate: brief.historicalBaseRate || '',
+    platform: platform || '',
+  });
+  const shareImageUrl = `${B4E_API}/api/brief-image?${shareParams.toString()}`;
+
   // Footer
   html += `
-    <div class="b4e-footer">
+    <div class="b4e-footer" style="position:relative;">
       <span class="b4e-time">${brief.generatedAt ? timeAgo(brief.generatedAt) : ''}</span>
       <div style="display:flex;align-items:center;gap:10px;">
+        <button class="b4e-share" title="Share as image" data-share-url="${escapeHtml(shareImageUrl)}">&#x1F4F7;</button>
         <button class="b4e-refresh" title="Refresh brief">&#x21bb;</button>
         <a class="b4e-link" href="${B4E_API}/market/${slug}" target="_blank">
           Open in before &rarr;
         </a>
       </div>
+      <span class="b4e-share-toast">Image copied!</span>
     </div>
   `;
 
@@ -610,6 +657,29 @@ function renderBrief(host, brief, platform, refreshFn) {
   const refreshBtn = body.querySelector('.b4e-refresh');
   if (refreshBtn && refreshFn) {
     refreshBtn.addEventListener('click', refreshFn);
+  }
+
+  // Wire share button - fetches the image and copies to clipboard
+  const shareBtn = body.querySelector('.b4e-share');
+  const toast = body.querySelector('.b4e-share-toast');
+  if (shareBtn) {
+    shareBtn.addEventListener('click', async () => {
+      const url = shareBtn.getAttribute('data-share-url');
+      try {
+        const res = await fetch(url);
+        const blob = await res.blob();
+        await navigator.clipboard.write([
+          new ClipboardItem({ 'image/png': blob })
+        ]);
+        if (toast) {
+          toast.classList.add('show');
+          setTimeout(() => toast.classList.remove('show'), 2000);
+        }
+      } catch (err) {
+        // Fallback: open image in new tab if clipboard fails
+        window.open(url, '_blank');
+      }
+    });
   }
 }
 
