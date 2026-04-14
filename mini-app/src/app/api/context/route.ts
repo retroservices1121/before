@@ -1,17 +1,33 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { server, getPaymentConfig } from '@/lib/x402';
-import { withX402 } from '@x402/next';
+import { getBalance, deductCredit } from '@/lib/credits';
 
 const B4E_API = process.env.B4E_API_URL || 'https://b4enews.com';
 const ADMIN_KEY = process.env.B4E_ADMIN_KEY || '';
 
-async function handler(request: NextRequest) {
+export async function GET(request: NextRequest) {
   const slug = request.nextUrl.searchParams.get('slug');
+  const address = request.nextUrl.searchParams.get('address');
 
   if (!slug) {
     return NextResponse.json(
       { error: 'Missing slug parameter' },
       { status: 400 }
+    );
+  }
+
+  if (!address) {
+    return NextResponse.json(
+      { error: 'Missing address parameter' },
+      { status: 400 }
+    );
+  }
+
+  // Check credit balance
+  const balance = getBalance(address);
+  if (balance < 1) {
+    return NextResponse.json(
+      { error: 'No credits remaining', balance: 0 },
+      { status: 402 }
     );
   }
 
@@ -32,20 +48,17 @@ async function handler(request: NextRequest) {
     );
   }
 
-  const brief = await res.json();
+  // Brief fetched successfully, deduct the credit
+  const deducted = deductCredit(address);
+  if (!deducted) {
+    console.warn('[Credits] Deduction failed after balance check for', address);
+  }
 
-  // Strip internal usage data (mini app uses x402, not tier limits)
+  const brief = await res.json();
   delete brief._usage;
+
+  // Include remaining balance in response
+  brief._credits = getBalance(address);
 
   return NextResponse.json(brief);
 }
-
-// Wrap with x402 - every brief costs USDC
-export const GET = withX402(
-  handler,
-  {
-    accepts: [getPaymentConfig()],
-    description: 'AI intelligence brief for a prediction market',
-  },
-  server
-);

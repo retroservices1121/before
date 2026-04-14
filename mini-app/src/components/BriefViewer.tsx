@@ -2,7 +2,7 @@
 
 import { useState, useCallback } from 'react';
 import { useMiniKit } from '@coinbase/onchainkit/minikit';
-import { usePayment } from './PaymentProvider';
+import { useCredits } from './CreditsProvider';
 import { Market, getTradeUrl } from '@/lib/markets';
 
 interface Brief {
@@ -33,16 +33,34 @@ export default function BriefViewer({ market, onBack }: Props) {
   const [brief, setBrief] = useState<Brief | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const { fetchWithPayment, ready } = usePayment();
+  const [showBuyCredits, setShowBuyCredits] = useState(false);
+  const { balance, connected, address, purchasing, purchaseCredits, packages, setBalance } = useCredits();
   const { sdk } = useMiniKit();
 
   const loadBrief = useCallback(async () => {
+    if (!address) {
+      setError('Connect your wallet to use credits');
+      return;
+    }
+
+    if (balance < 1) {
+      setShowBuyCredits(true);
+      return;
+    }
+
     setLoading(true);
     setError(null);
 
     try {
       const slug = market.slug;
-      const res = await fetchWithPayment(`/api/context?slug=${encodeURIComponent(slug)}`);
+      const res = await fetch(
+        `/api/context?slug=${encodeURIComponent(slug)}&address=${encodeURIComponent(address)}`
+      );
+
+      if (res.status === 402) {
+        setShowBuyCredits(true);
+        return;
+      }
 
       if (!res.ok) {
         const data = await res.json().catch(() => ({}));
@@ -50,17 +68,28 @@ export default function BriefViewer({ market, onBack }: Props) {
       }
 
       const data = await res.json();
+      if (data._credits !== undefined) {
+        setBalance(data._credits);
+      }
       setBrief(data);
     } catch (err: any) {
-      if (err.message === 'Wallet not connected') {
-        setError('Connect your wallet to pay for briefs');
-      } else {
-        setError(err.message);
-      }
+      setError(err.message);
     } finally {
       setLoading(false);
     }
-  }, [market.slug, fetchWithPayment]);
+  }, [market.slug, address, balance, setBalance]);
+
+  const handleBuyCredits = useCallback(
+    async (packageId: string) => {
+      try {
+        await purchaseCredits(packageId);
+        setShowBuyCredits(false);
+      } catch (err: any) {
+        setError(err.message);
+      }
+    },
+    [purchaseCredits]
+  );
 
   function handleTrade() {
     const url = getTradeUrl(market);
@@ -117,7 +146,80 @@ export default function BriefViewer({ market, onBack }: Props) {
 
       {/* Brief section */}
       <div className="flex-1 px-4 py-4">
-        {!brief && !loading && !error && (
+        {/* Buy credits modal */}
+        {showBuyCredits && (
+          <div className="py-6">
+            <div className="text-center mb-4">
+              <div
+                className="text-[9px] tracking-[2px] uppercase text-[var(--text-muted)] mb-2"
+                style={{ fontFamily: 'monospace' }}
+              >
+                Buy Credits
+              </div>
+              <p className="text-[13px] text-[var(--text-muted)]">
+                Each brief costs 1 credit. Pick a package to continue.
+              </p>
+            </div>
+
+            <div className="flex flex-col gap-3 mb-4">
+              {packages.map((pkg) => (
+                <button
+                  key={pkg.id}
+                  onClick={() => handleBuyCredits(pkg.id)}
+                  disabled={purchasing}
+                  className="w-full flex items-center justify-between px-4 py-3 bg-[var(--surface)] border border-[var(--border)] rounded-lg hover:border-[var(--accent)]/30 disabled:opacity-50 active:scale-[0.98] transition-all"
+                >
+                  <div className="text-left">
+                    <div
+                      className="text-[13px] font-semibold text-[var(--text)]"
+                      style={{ fontFamily: 'monospace' }}
+                    >
+                      {pkg.label}
+                    </div>
+                    <div className="text-[11px] text-[var(--text-muted)]">
+                      {(pkg.price / pkg.credits).toFixed(2)}/brief
+                    </div>
+                  </div>
+                  <span
+                    className="text-[14px] font-bold text-[var(--accent)]"
+                    style={{ fontFamily: 'monospace' }}
+                  >
+                    {pkg.priceLabel}
+                  </span>
+                </button>
+              ))}
+            </div>
+
+            {purchasing && (
+              <div className="text-center">
+                <div className="w-5 h-5 mx-auto mb-2 border-2 border-[var(--border)] border-t-[var(--accent)] rounded-full animate-spin" />
+                <p
+                  className="text-[11px] text-[var(--text-muted)]"
+                  style={{ fontFamily: 'monospace' }}
+                >
+                  Confirming payment...
+                </p>
+              </div>
+            )}
+
+            <button
+              onClick={() => setShowBuyCredits(false)}
+              className="w-full text-center text-[11px] text-[var(--text-muted)] mt-2 py-2"
+              style={{ fontFamily: 'monospace' }}
+            >
+              Cancel
+            </button>
+
+            <p
+              className="text-center mt-2 text-[10px] text-[var(--text-muted)]"
+              style={{ fontFamily: 'monospace' }}
+            >
+              Paid via USDC on Base
+            </p>
+          </div>
+        )}
+
+        {!brief && !loading && !error && !showBuyCredits && (
           <div className="text-center py-8">
             <div className="flex items-center justify-center gap-2 mb-3">
               <span
@@ -141,19 +243,25 @@ export default function BriefViewer({ market, onBack }: Props) {
 
             <button
               onClick={loadBrief}
-              disabled={!ready}
+              disabled={!connected}
               className="text-[12px] tracking-[1px] px-6 py-3 bg-[var(--accent)] text-[var(--bg)] font-semibold rounded-lg disabled:opacity-50 active:scale-[0.97] transition-transform"
               style={{ fontFamily: 'monospace' }}
             >
-              {ready ? 'Generate Brief — $0.50' : 'Connect wallet to continue'}
+              {connected
+                ? balance > 0
+                  ? `Generate Brief — 1 credit`
+                  : 'Buy Credits to Start'
+                : 'Connect wallet to continue'}
             </button>
 
-            <p
-              className="mt-3 text-[10px] text-[var(--text-muted)]"
-              style={{ fontFamily: 'monospace' }}
-            >
-              Paid via USDC on Base
-            </p>
+            {connected && (
+              <p
+                className="mt-3 text-[10px] text-[var(--text-muted)]"
+                style={{ fontFamily: 'monospace' }}
+              >
+                {balance} credit{balance !== 1 ? 's' : ''} remaining
+              </p>
+            )}
           </div>
         )}
 

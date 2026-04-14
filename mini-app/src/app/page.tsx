@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react';
 import { Market } from '@/lib/markets';
 import MarketCard from '@/components/MarketCard';
 import BriefViewer from '@/components/BriefViewer';
-import PaymentProvider from '@/components/PaymentProvider';
+import CreditsProvider from '@/components/CreditsProvider';
 
 const B4E_API = process.env.NEXT_PUBLIC_B4E_API || 'https://b4enews.com';
 
@@ -23,12 +23,12 @@ export default function HomePage() {
 
   if (selectedMarket) {
     return (
-      <PaymentProvider>
+      <CreditsProvider>
         <BriefViewer
           market={selectedMarket}
           onBack={() => setSelectedMarket(null)}
         />
-      </PaymentProvider>
+      </CreditsProvider>
     );
   }
 
@@ -103,7 +103,7 @@ export default function HomePage() {
         className="mt-8 text-center text-[10px] text-[var(--text-muted)] pb-4"
         style={{ fontFamily: 'monospace' }}
       >
-        Briefs cost $0.50 USDC on Base
+        10 credits $0.99 &middot; 50 credits $3.99 &middot; USDC on Base
       </div>
     </div>
   );
