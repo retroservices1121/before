@@ -1,11 +1,19 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import UserMenu from '@/components/UserMenu';
+import ServiceWorkerRegistrar from '@/components/ServiceWorkerRegistrar';
 import './globals.css';
 
 export const metadata: Metadata = {
   title: 'Before — Know Before It Matters',
   description: 'AI-powered market intelligence for prediction markets. Real-time context, discovery, and insights.',
+  manifest: '/manifest.json',
+  themeColor: '#00e59f',
+  appleWebApp: {
+    capable: true,
+    statusBarStyle: 'black-translucent',
+    title: 'before',
+  },
   openGraph: {
     title: 'Before — Know Before It Matters',
     description: 'AI-powered market intelligence for prediction markets.',
@@ -20,6 +28,10 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en">
+      <head>
+        <link rel="apple-touch-icon" href="/icons/icon-192.png" />
+        <meta name="apple-mobile-web-app-capable" content="yes" />
+      </head>
       <body>
         {/* Nav */}
         <nav className="fixed top-0 left-0 right-0 z-50 px-6 py-4 flex justify-between items-center backdrop-blur-xl bg-b4e-bg/85 border-b border-b4e-border">
@@ -47,6 +59,8 @@ export default function RootLayout({
             <UserMenu />
           </div>
         </nav>
+
+        <ServiceWorkerRegistrar />
 
         {/* Main content */}
         <main className="pt-[72px] min-h-screen">{children}</main>
