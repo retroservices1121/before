@@ -9,6 +9,7 @@ import {
   formatProbability,
   formatPriceChange,
   getPlatformLabel,
+  slugify,
 } from '@/lib/utils';
 
 export const dynamic = 'force-dynamic';
@@ -27,7 +28,11 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
     title: market.title,
     probability: formatProbability(market.probability),
     platform: market.platform,
+    volume: formatVolume(market.volume),
   });
+  if (market.outcomes && Object.keys(market.outcomes).length >= 3) {
+    ogImageParams.set('outcomes', JSON.stringify(market.outcomes));
+  }
   const ogImageUrl = `${APP_URL}/api/brief-image?${ogImageParams.toString()}`;
 
   return {

@@ -3,31 +3,53 @@ import { NextRequest } from 'next/server';
 
 export const runtime = 'edge';
 
+const APP_URL = process.env.NEXT_PUBLIC_APP_URL || 'https://b4enews.com';
+
 export async function GET(request: NextRequest) {
   const params = request.nextUrl.searchParams;
   const title = params.get('title') || 'Market';
   const summary = params.get('summary') || '';
   const factors = params.get('factors') || '[]';
-  const baseRate = params.get('baseRate') || '';
-  const catalysts = params.get('catalysts') || '[]';
   const probability = params.get('probability') || '';
   const platform = params.get('platform') || '';
+  const volume = params.get('volume') || '';
+  const outcomes = params.get('outcomes') || '';
 
-  let factorList: { name: string; sentiment: string; detail?: string }[] = [];
-  let catalystList: string[] = [];
-
+  let factorList: { name: string; sentiment: string }[] = [];
   try {
     factorList = JSON.parse(factors);
   } catch {}
-  try {
-    catalystList = JSON.parse(catalysts);
-  } catch {}
+
+  // Parse outcomes for multi-market events
+  let outcomeList: { name: string; prob: string }[] = [];
+  if (outcomes) {
+    try {
+      const parsed = JSON.parse(outcomes);
+      outcomeList = Object.entries(parsed)
+        .map(([name, prob]) => ({ name, prob: `${((prob as number) * 100).toFixed(0)}%` }))
+        .sort((a, b) => parseFloat(b.prob) - parseFloat(a.prob))
+        .slice(0, 4);
+    } catch {}
+  }
 
   const sentimentColor = (s: string) => {
     if (s === 'bullish') return '#00e59f';
     if (s === 'bearish') return '#ff6b6b';
     if (s === 'neutral') return '#f59e0b';
     return '#525252';
+  };
+
+  const sentimentArrow = (s: string) => {
+    if (s === 'bullish') return '▲';
+    if (s === 'bearish') return '▼';
+    return '●';
+  };
+
+  const platformLabel = (p: string) => {
+    if (p === 'polymarket') return 'Polymarket';
+    if (p === 'limitless') return 'Limitless';
+    if (p === 'kalshi') return 'Kalshi';
+    return p;
   };
 
   const platformColor = (p: string) => {
@@ -37,203 +59,188 @@ export async function GET(request: NextRequest) {
     return '#00e59f';
   };
 
+  const isMultiOutcome = outcomeList.length > 0;
+  const hasBriefData = summary || factorList.length > 0;
+
+  // Fetch the background image as base64
+  let bgSrc = `${APP_URL}/og.png`;
+  try {
+    const bgRes = await fetch(bgSrc);
+    if (bgRes.ok) {
+      const buf = await bgRes.arrayBuffer();
+      const b64 = Buffer.from(buf).toString('base64');
+      bgSrc = `data:image/png;base64,${b64}`;
+    }
+  } catch {}
+
   return new ImageResponse(
     (
       <div
         style={{
           display: 'flex',
-          flexDirection: 'column',
           width: '100%',
           height: '100%',
-          backgroundColor: '#0a0a0a',
-          padding: '40px',
-          fontFamily: 'system-ui, -apple-system, sans-serif',
+          position: 'relative',
         }}
       >
-        {/* Header */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '8px' }}>
-          <div
-            style={{
-              width: '8px',
-              height: '8px',
-              borderRadius: '50%',
-              backgroundColor: '#00e59f',
-              boxShadow: '0 0 8px rgba(0,229,159,0.6)',
-            }}
-          />
-          <span
-            style={{
-              fontSize: '14px',
-              letterSpacing: '3px',
-              textTransform: 'uppercase' as const,
-              color: '#00e59f',
-            }}
-          >
-            before Intelligence Brief
-          </span>
-        </div>
-
-        {/* Platform + Probability */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: '16px', marginBottom: '16px' }}>
-          {platform && (
-            <span
-              style={{
-                fontSize: '11px',
-                letterSpacing: '1.5px',
-                textTransform: 'uppercase' as const,
-                padding: '3px 10px',
-                borderRadius: '4px',
-                color: platformColor(platform),
-                backgroundColor: `${platformColor(platform)}20`,
-              }}
-            >
-              {platform}
-            </span>
-          )}
-          {probability && (
-            <span
-              style={{
-                fontSize: '28px',
-                fontWeight: 700,
-                color: '#00e59f',
-              }}
-            >
-              {probability}
-            </span>
-          )}
-        </div>
-
-        {/* Title */}
-        <div
+        {/* Background image */}
+        <img
+          src={bgSrc}
           style={{
-            fontSize: '22px',
-            fontWeight: 600,
-            color: '#e5e5e5',
-            lineHeight: 1.3,
-            marginBottom: '20px',
+            position: 'absolute',
+            top: 0,
+            left: 0,
+            width: '100%',
+            height: '100%',
           }}
-        >
-          {title}
-        </div>
+        />
 
-        {/* Summary */}
-        {summary && (
-          <div style={{ display: 'flex', flexDirection: 'column', marginBottom: '20px' }}>
-            <span
-              style={{
-                fontSize: '10px',
-                letterSpacing: '2px',
-                textTransform: 'uppercase' as const,
-                color: '#525252',
-                marginBottom: '6px',
-              }}
-            >
-              Why This Probability
-            </span>
-            <span
-              style={{
-                fontSize: '14px',
-                lineHeight: 1.6,
-                color: '#a3a3a3',
-              }}
-            >
-              {summary.length > 280 ? summary.slice(0, 280) + '...' : summary}
-            </span>
-          </div>
-        )}
-
-        {/* Divider */}
-        <div style={{ width: '100%', height: '1px', backgroundColor: '#1e1e1e', marginBottom: '16px' }} />
-
-        {/* Key Factors */}
-        {factorList.length > 0 && (
-          <div style={{ display: 'flex', flexDirection: 'column', marginBottom: '16px' }}>
-            <span
-              style={{
-                fontSize: '10px',
-                letterSpacing: '2px',
-                textTransform: 'uppercase' as const,
-                color: '#525252',
-                marginBottom: '8px',
-              }}
-            >
-              Key Factors
-            </span>
-            {factorList.slice(0, 4).map((f, i) => (
-              <div
-                key={i}
-                style={{
-                  display: 'flex',
-                  justifyContent: 'space-between',
-                  alignItems: 'center',
-                  padding: '4px 0',
-                }}
-              >
-                <span style={{ fontSize: '13px', color: '#a3a3a3' }}>{f.name}</span>
-                <span
-                  style={{
-                    fontSize: '11px',
-                    fontWeight: 600,
-                    color: sentimentColor(f.sentiment),
-                    textTransform: 'capitalize' as const,
-                  }}
-                >
-                  {f.sentiment}
-                </span>
-              </div>
-            ))}
-          </div>
-        )}
-
-        {/* Catalysts */}
-        {catalystList.length > 0 && (
-          <div style={{ display: 'flex', flexDirection: 'column', marginBottom: '16px' }}>
-            <div style={{ width: '100%', height: '1px', backgroundColor: '#1e1e1e', marginBottom: '12px' }} />
-            <span
-              style={{
-                fontSize: '10px',
-                letterSpacing: '2px',
-                textTransform: 'uppercase' as const,
-                color: '#525252',
-                marginBottom: '8px',
-              }}
-            >
-              Upcoming Catalysts
-            </span>
-            {catalystList.slice(0, 3).map((c, i) => (
-              <div key={i} style={{ display: 'flex', gap: '8px', padding: '2px 0' }}>
-                <span style={{ fontSize: '12px', color: '#00e59f' }}>→</span>
-                <span style={{ fontSize: '12px', color: '#a3a3a3', lineHeight: 1.4 }}>
-                  {c.length > 80 ? c.slice(0, 80) + '...' : c}
-                </span>
-              </div>
-            ))}
-          </div>
-        )}
-
-        {/* Footer */}
+        {/* Content overlay */}
         <div
           style={{
             display: 'flex',
-            justifyContent: 'space-between',
-            alignItems: 'center',
-            marginTop: 'auto',
-            paddingTop: '16px',
-            borderTop: '1px solid #1e1e1e',
+            flexDirection: 'column',
+            position: 'absolute',
+            top: '85px',
+            left: '40px',
+            right: '40px',
+            bottom: '65px',
           }}
         >
-          <span style={{ fontSize: '16px', color: '#00e59f', fontStyle: 'italic' }}>
-            before
-          </span>
-          <span style={{ fontSize: '11px', color: '#525252', letterSpacing: '1px' }}>
-            b4enews.com — Know before it matters
-          </span>
+          {/* Market title */}
+          <div
+            style={{
+              fontSize: '24px',
+              fontWeight: 700,
+              color: '#e5e5e5',
+              lineHeight: 1.3,
+              marginBottom: '12px',
+            }}
+          >
+            {title.length > 80 ? title.slice(0, 77) + '...' : title}
+          </div>
+
+          {/* Platform badge + probability + volume row */}
+          <div style={{ display: 'flex', alignItems: 'center', gap: '14px', marginBottom: '16px' }}>
+            {platform && (
+              <span
+                style={{
+                  fontSize: '11px',
+                  letterSpacing: '1.5px',
+                  textTransform: 'uppercase' as const,
+                  fontWeight: 600,
+                  padding: '3px 10px',
+                  borderRadius: '4px',
+                  color: platformColor(platform),
+                  backgroundColor: `${platformColor(platform)}20`,
+                }}
+              >
+                {platformLabel(platform)}
+              </span>
+            )}
+            {probability && !isMultiOutcome && (
+              <span style={{ fontSize: '28px', fontWeight: 700, color: '#00e59f' }}>
+                {probability}
+              </span>
+            )}
+            {volume && (
+              <span style={{ fontSize: '13px', color: '#525252' }}>
+                Vol: {volume}
+              </span>
+            )}
+          </div>
+
+          {/* Multi-outcome grid OR probability bar */}
+          {isMultiOutcome ? (
+            <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px', marginBottom: '16px' }}>
+              {outcomeList.map((o, i) => (
+                <div
+                  key={i}
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '6px',
+                    padding: '6px 12px',
+                    borderRadius: '6px',
+                    backgroundColor: '#1e1e1e',
+                    border: i === 0 ? '1px solid #00e59f40' : '1px solid #1e1e1e',
+                  }}
+                >
+                  <span style={{ fontSize: '16px', fontWeight: 700, color: i === 0 ? '#00e59f' : '#e5e5e5' }}>
+                    {o.prob}
+                  </span>
+                  <span style={{ fontSize: '11px', color: '#a3a3a3', maxWidth: '160px' }}>
+                    {o.name.length > 35 ? o.name.slice(0, 32) + '...' : o.name}
+                  </span>
+                </div>
+              ))}
+            </div>
+          ) : probability ? (
+            <div style={{ display: 'flex', marginBottom: '16px' }}>
+              <div
+                style={{
+                  display: 'flex',
+                  width: '100%',
+                  height: '6px',
+                  backgroundColor: '#1e1e1e',
+                  borderRadius: '3px',
+                  overflow: 'hidden',
+                }}
+              >
+                <div
+                  style={{
+                    width: probability,
+                    height: '100%',
+                    backgroundColor: '#00e59f',
+                    borderRadius: '3px',
+                  }}
+                />
+              </div>
+            </div>
+          ) : null}
+
+          {/* Summary (truncated) */}
+          {summary && (
+            <div
+              style={{
+                fontSize: '13px',
+                lineHeight: 1.6,
+                color: '#a3a3a3',
+                marginBottom: '14px',
+              }}
+            >
+              {summary.length > 200 ? summary.slice(0, 197) + '...' : summary}
+            </div>
+          )}
+
+          {/* Key factors row */}
+          {factorList.length > 0 && (
+            <div style={{ display: 'flex', flexWrap: 'wrap', gap: '12px', marginTop: 'auto' }}>
+              {factorList.slice(0, 4).map((f, i) => (
+                <div
+                  key={i}
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '5px',
+                  }}
+                >
+                  <span style={{ fontSize: '11px', color: sentimentColor(f.sentiment) }}>
+                    {sentimentArrow(f.sentiment)}
+                  </span>
+                  <span style={{ fontSize: '11px', color: '#a3a3a3' }}>
+                    {f.name.length > 25 ? f.name.slice(0, 22) + '...' : f.name}
+                  </span>
+                </div>
+              ))}
+            </div>
+          )}
         </div>
       </div>
     ),
     {
-      width: 600,
-      height: 630,
+      width: 960,
+      height: 540,
     }
   );
 }
