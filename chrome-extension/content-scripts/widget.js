@@ -195,6 +195,40 @@ const WIDGET_STYLES = `
     background: rgba(0, 229, 159, 0.2);
   }
 
+  /* Generate brief CTA */
+  .b4e-generate {
+    padding: 20px 14px;
+    text-align: center;
+  }
+
+  .b4e-generate-btn {
+    background: rgba(0, 229, 159, 0.1);
+    border: 1px solid rgba(0, 229, 159, 0.3);
+    color: var(--b4e-accent);
+    font-family: monospace;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    padding: 10px 24px;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: background 0.2s, box-shadow 0.2s;
+  }
+
+  .b4e-generate-btn:hover {
+    background: rgba(0, 229, 159, 0.2);
+    box-shadow: 0 0 16px rgba(0, 229, 159, 0.15);
+  }
+
+  .b4e-generate-hint {
+    font-family: monospace;
+    font-size: 9px;
+    color: var(--b4e-muted);
+    margin-top: 8px;
+    letter-spacing: 0.5px;
+  }
+
   /* Section labels */
   .b4e-label {
     font-family: monospace;
@@ -780,7 +814,19 @@ async function injectB4EWidget(anchorEl, title, platform, extra) {
     }
   }
 
-  loadBrief(false);
+  // Show generate button instead of auto-fetching (costs a credit)
+  function showGenerateButton() {
+    const body = widget._shadow.querySelector('.b4e-body');
+    body.innerHTML = `
+      <div class="b4e-generate">
+        <button class="b4e-generate-btn">Generate Brief</button>
+        <div class="b4e-generate-hint">Uses 1 credit</div>
+      </div>
+    `;
+    body.querySelector('.b4e-generate-btn').addEventListener('click', () => loadBrief(false));
+  }
+
+  showGenerateButton();
 }
 
 // Export for use by content scripts

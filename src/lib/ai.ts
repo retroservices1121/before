@@ -57,8 +57,12 @@ export async function generateContextBrief(market: Market): Promise<ContextBrief
     : `\nIMPORTANT: No live news data was available. Do NOT fabricate or assume facts about recent events, election results, who holds office, or outcomes you are uncertain about. Focus on structural factors, historical patterns, and the market data provided. If you are unsure who won a past election or what happened recently, say "based on market pricing" instead of guessing.`;
 
   const hasMarketData = market.volume > 0 || market.probability > 0;
+  const yesProb = market.probability;
+  const noProb = 1 - market.probability;
+  const leadOutcome = yesProb >= 0.5 ? 'Yes' : 'No';
+  const leadProb = yesProb >= 0.5 ? yesProb : noProb;
   const marketDataLine = hasMarketData
-    ? `Probability: ${(market.probability * 100).toFixed(1)}% | Volume: $${market.volume.toLocaleString()} | Platform: ${market.platform}`
+    ? `Yes: ${(yesProb * 100).toFixed(1)}% | No: ${(noProb * 100).toFixed(1)}% | Leading outcome: ${leadOutcome} at ${(leadProb * 100).toFixed(1)}% | Volume: $${market.volume.toLocaleString()} | Platform: ${market.platform}`
     : `Platform: ${market.platform} (No market data available — analyze based on the event itself)`;
   const statsLine = [
     market.endDate ? `Resolves: ${market.endDate}` : '',

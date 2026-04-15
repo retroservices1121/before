@@ -64,3 +64,55 @@ export function slugify(text: string): string {
     .replace(/[^a-z0-9]+/g, '-')
     .replace(/(^-|-$)/g, '');
 }
+
+export interface ParsedMarketUrl {
+  platform: 'polymarket' | 'limitless' | 'kalshi';
+  eventSlug: string;
+  /** Human-readable title derived from the slug */
+  title: string;
+}
+
+/**
+ * Parse a prediction market URL into platform + slug + title.
+ * Returns null if the URL doesn't match a known platform.
+ *
+ * Supported formats:
+ *   https://polymarket.com/event/some-event-slug
+ *   https://polymarket.com/event/some-event-slug/sub-market
+ *   https://limitless.exchange/markets/some-slug
+ *   https://kalshi.com/markets/TICKER
+ *   https://kalshi.com/markets/TICKER/sub-market
+ */
+export function parseMarketUrl(raw: string): ParsedMarketUrl | null {
+  let url: URL;
+  try {
+    url = new URL(raw.trim());
+  } catch {
+    return null;
+  }
+
+  const segments = url.pathname.split('/').filter(Boolean);
+
+  // Polymarket: /event/<slug>[/<sub>]
+  if (url.hostname.includes('polymarket.com') && segments[0] === 'event' && segments[1]) {
+    const eventSlug = segments[1];
+    const title = eventSlug.replace(/-/g, ' ');
+    return { platform: 'polymarket', eventSlug, title };
+  }
+
+  // Limitless: /markets/<slug>
+  if (url.hostname.includes('limitless.exchange') && segments[0] === 'markets' && segments[1]) {
+    const eventSlug = segments[1];
+    const title = eventSlug.replace(/-/g, ' ');
+    return { platform: 'limitless', eventSlug, title };
+  }
+
+  // Kalshi: /markets/<ticker>[/<sub>]
+  if (url.hostname.includes('kalshi.com') && segments[0] === 'markets' && segments[1]) {
+    const ticker = segments[1];
+    const title = ticker.replace(/[-_]/g, ' ');
+    return { platform: 'kalshi', eventSlug: ticker, title };
+  }
+
+  return null;
+}

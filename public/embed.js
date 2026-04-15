@@ -86,6 +86,10 @@
     .b4e-e-error-text{font-family:monospace;font-size:11px;color:' + t.muted + '}\
     .b4e-e-retry{background:' + t.accent + '18;border:1px solid ' + t.accent + '40;color:' + t.accent + ';font-family:monospace;font-size:10px;padding:4px 12px;border-radius:4px;cursor:pointer;margin-top:8px;letter-spacing:.5px}\
     .b4e-e-retry:hover{background:' + t.accent + '30}\
+    .b4e-e-generate{padding:20px 14px;text-align:center}\
+    .b4e-e-generate-btn{background:' + t.accent + '18;border:1px solid ' + t.accent + '40;color:' + t.accent + ';font-family:monospace;font-size:11px;font-weight:600;letter-spacing:1.5px;text-transform:uppercase;padding:10px 24px;border-radius:6px;cursor:pointer;transition:background .2s,box-shadow .2s}\
+    .b4e-e-generate-btn:hover{background:' + t.accent + '30;box-shadow:0 0 16px ' + t.accent + '25}\
+    .b4e-e-generate-hint{font-family:monospace;font-size:9px;color:' + t.muted + ';margin-top:8px;letter-spacing:.5px}\
     .b4e-e-label{font-family:monospace;font-size:9px;letter-spacing:2px;text-transform:uppercase;color:' + t.muted + ';margin-bottom:6px}\
     .b4e-e-summary{font-size:13px;line-height:1.7;color:' + t.dim + ';margin-bottom:14px}\
     .b4e-e-divider{border:none;border-top:1px solid ' + t.border + ';margin:12px 0}\
@@ -230,9 +234,9 @@
         '<span class="b4e-e-toggle">\u25BC</span>' +
         '</div>' +
         '<div class="b4e-e-body' + (collapsed ? '' : ' open') + '">' +
-        '<div class="b4e-e-loading">' +
-        '<div class="b4e-e-spinner"></div>' +
-        '<span class="b4e-e-loading-text">Generating context brief...</span>' +
+        '<div class="b4e-e-generate">' +
+        '<button class="b4e-e-generate-btn">Generate Brief</button>' +
+        '<div class="b4e-e-generate-hint">Uses 1 credit</div>' +
         '</div>' +
         '</div>' +
         '</div>' +
@@ -530,8 +534,12 @@
     setTimeout(function () {
       widget._initIframe();
 
-      // Fetch and render
+      // Fetch and render (triggered by user click)
       function loadBrief() {
+        var body = widget._doc.querySelector('.b4e-e-body');
+        body.innerHTML = '<div class="b4e-e-loading"><div class="b4e-e-spinner"></div><span class="b4e-e-loading-text">Generating context brief...</span></div>';
+        if (widget._resize) setTimeout(widget._resize, 10);
+
         fetchBrief(slug, function (err, brief) {
           if (err) {
             if (err.rateLimited) {
@@ -545,7 +553,11 @@
         });
       }
 
-      loadBrief();
+      // Wire generate button instead of auto-fetching
+      var genBtn = widget._doc.querySelector('.b4e-e-generate-btn');
+      if (genBtn) {
+        genBtn.addEventListener('click', loadBrief);
+      }
     }, 100);
   }
 
@@ -609,6 +621,10 @@
         widget._initIframe();
 
         function loadBrief() {
+          var body = widget._doc.querySelector('.b4e-e-body');
+          body.innerHTML = '<div class="b4e-e-loading"><div class="b4e-e-spinner"></div><span class="b4e-e-loading-text">Generating context brief...</span></div>';
+          if (widget._resize) setTimeout(widget._resize, 10);
+
           fetchBrief(slug, function (err, brief) {
             if (err) {
               if (err.rateLimited) {
@@ -622,7 +638,10 @@
           });
         }
 
-        loadBrief();
+        var genBtn = widget._doc.querySelector('.b4e-e-generate-btn');
+        if (genBtn) {
+          genBtn.addEventListener('click', loadBrief);
+        }
       }, 100);
     },
   };

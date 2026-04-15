@@ -1,5 +1,6 @@
 import { getTrendingMarkets } from '@/lib/spredd';
 import MarketFeed from '@/components/MarketFeed';
+import MarketUrlLookup from '@/components/MarketUrlLookup';
 
 export const revalidate = 60; // ISR: revalidate every 60 seconds
 
@@ -21,9 +22,12 @@ export default async function HomePage() {
         </h1>
         <p className="text-b4e-text-dim text-[16px] max-w-xl leading-relaxed">
           High-volume prediction markets across Polymarket, Limitless, and Kalshi.
-          Click any market for an AI-generated context brief.
+          Paste a market URL or click any market for an AI-generated context brief.
         </p>
       </div>
+
+      {/* URL lookup */}
+      <MarketUrlLookup />
 
       <MarketFeed markets={markets} />
     </div>
