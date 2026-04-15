@@ -86,6 +86,9 @@
     .b4e-e-error-text{font-family:monospace;font-size:11px;color:' + t.muted + '}\
     .b4e-e-retry{background:' + t.accent + '18;border:1px solid ' + t.accent + '40;color:' + t.accent + ';font-family:monospace;font-size:10px;padding:4px 12px;border-radius:4px;cursor:pointer;margin-top:8px;letter-spacing:.5px}\
     .b4e-e-retry:hover{background:' + t.accent + '30}\
+    .b4e-e-chart{padding:0 14px 10px}\
+    .b4e-e-chart-label{font-family:monospace;font-size:9px;letter-spacing:1.5px;text-transform:uppercase;color:' + t.muted + ';margin-bottom:6px}\
+    .b4e-e-chart canvas{width:100%;height:80px;border-radius:4px}\
     .b4e-e-generate{padding:20px 14px;text-align:center}\
     .b4e-e-generate-btn{background:' + t.accent + '18;border:1px solid ' + t.accent + '40;color:' + t.accent + ';font-family:monospace;font-size:11px;font-weight:600;letter-spacing:1.5px;text-transform:uppercase;padding:10px 24px;border-radius:6px;cursor:pointer;transition:background .2s,box-shadow .2s}\
     .b4e-e-generate-btn:hover{background:' + t.accent + '30;box-shadow:0 0 16px ' + t.accent + '25}\
@@ -348,6 +351,71 @@
     if (widget._resize) setTimeout(widget._resize, 10);
   }
 
+  function loadChartInEmbed(widget, title) {
+    var url = B4E_HOST + '/api/chart?title=' + encodeURIComponent(title);
+    fetch(url).then(function (res) {
+      if (!res.ok) return null;
+      return res.json();
+    }).then(function (data) {
+      if (!data || !data.candles || data.candles.length < 2) return;
+
+      var inner = widget._doc.querySelector('.b4e-e-inner');
+      if (!inner) return;
+
+      var chartDiv = widget._doc.createElement('div');
+      chartDiv.className = 'b4e-e-chart';
+      chartDiv.innerHTML = '<div class="b4e-e-chart-label">Price \u2014 30D</div>';
+
+      var canvas = widget._doc.createElement('canvas');
+      canvas.width = 500;
+      canvas.height = 80;
+      canvas.style.cssText = 'width:100%;height:80px;border-radius:4px;background:' + t.bg;
+      chartDiv.appendChild(canvas);
+
+      inner.parentNode.insertBefore(chartDiv, inner);
+
+      var ctx = canvas.getContext('2d');
+      var prices = data.candles.map(function (c) { return c.close; });
+      var min = Math.min.apply(null, prices);
+      var max = Math.max.apply(null, prices);
+      var range = max - min || 1;
+      var w = canvas.width;
+      var h = canvas.height;
+      var pad = 4;
+
+      var grad = ctx.createLinearGradient(0, 0, 0, h);
+      grad.addColorStop(0, t.accent + '40');
+      grad.addColorStop(1, t.accent + '00');
+
+      ctx.beginPath();
+      for (var i = 0; i < prices.length; i++) {
+        var x = (i / (prices.length - 1)) * (w - pad * 2) + pad;
+        var y = h - pad - ((prices[i] - min) / range) * (h - pad * 2);
+        if (i === 0) ctx.moveTo(x, y);
+        else ctx.lineTo(x, y);
+      }
+      var lastX = (w - pad * 2) + pad;
+      ctx.lineTo(lastX, h);
+      ctx.lineTo(pad, h);
+      ctx.closePath();
+      ctx.fillStyle = grad;
+      ctx.fill();
+
+      ctx.beginPath();
+      for (var j = 0; j < prices.length; j++) {
+        var x2 = (j / (prices.length - 1)) * (w - pad * 2) + pad;
+        var y2 = h - pad - ((prices[j] - min) / range) * (h - pad * 2);
+        if (j === 0) ctx.moveTo(x2, y2);
+        else ctx.lineTo(x2, y2);
+      }
+      ctx.strokeStyle = t.accent;
+      ctx.lineWidth = 1.5;
+      ctx.stroke();
+
+      if (widget._resize) setTimeout(widget._resize, 10);
+    }).catch(function () {});
+  }
+
   function renderError(widget, message, retryFn) {
     var body = widget._doc.querySelector('.b4e-e-body');
     body.innerHTML = '<div class="b4e-e-error">\
@@ -550,6 +618,7 @@
             return;
           }
           renderBrief(widget, brief, slug);
+          loadChartInEmbed(widget, title);
         });
       }
 
@@ -635,6 +704,7 @@
               return;
             }
             renderBrief(widget, brief, slug);
+            loadChartInEmbed(widget, opts.title);
           });
         }
 

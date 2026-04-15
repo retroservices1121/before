@@ -426,6 +426,27 @@ const WIDGET_STYLES = `
     background: rgba(0, 229, 159, 0.2);
   }
 
+  /* Sparkline chart */
+  .b4e-chart {
+    padding: 0 14px 10px;
+  }
+
+  .b4e-chart-label {
+    font-family: monospace;
+    font-size: 9px;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    color: var(--b4e-muted);
+    margin-bottom: 6px;
+  }
+
+  .b4e-chart canvas {
+    width: 100%;
+    height: 80px;
+    border-radius: 4px;
+    background: var(--b4e-bg);
+  }
+
   /* Usage nudge bar */
   .b4e-nudge {
     display: flex;
@@ -685,18 +706,97 @@ function renderBrief(host, brief, platform, refreshFn) {
     refreshBtn.addEventListener('click', refreshFn);
   }
 
-  // Wire share button - copy market URL to clipboard
+  // Wire share button - copy market URL + summary to clipboard
   const shareBtn = body.querySelector('.b4e-share');
   const toast = body.querySelector('.b4e-share-toast');
   if (shareBtn) {
     shareBtn.addEventListener('click', () => {
-      navigator.clipboard.writeText(marketUrl).then(() => {
+      const summary = brief.summary
+        ? (brief.summary.length > 200 ? brief.summary.slice(0, 197) + '...' : brief.summary)
+        : '';
+      const shareText = summary ? `${summary}\n\n${marketUrl}` : marketUrl;
+      navigator.clipboard.writeText(shareText).then(() => {
         if (toast) {
           toast.classList.add('show');
           setTimeout(() => toast.classList.remove('show'), 2000);
         }
       });
     });
+  }
+}
+
+// Fetch chart data and draw sparkline in the widget
+async function loadChartInWidget(host, title) {
+  try {
+    const url = `${B4E_API}/api/chart?title=${encodeURIComponent(title)}`;
+    const res = await fetch(url);
+    if (!res.ok) return; // silently skip for non-crypto markets
+
+    const data = await res.json();
+    if (!data.candles || data.candles.length < 2) return;
+
+    const shadow = host._shadow;
+    const body = shadow.querySelector('.b4e-body');
+    const inner = body.querySelector('.b4e-inner');
+    if (!inner) return;
+
+    // Insert chart div before the inner content
+    const chartDiv = document.createElement('div');
+    chartDiv.className = 'b4e-chart';
+    chartDiv.innerHTML = '<div class="b4e-chart-label">Price — 30D</div>';
+
+    const canvas = document.createElement('canvas');
+    canvas.width = 352;
+    canvas.height = 80;
+    canvas.style.cssText = 'width:100%;height:80px;border-radius:4px;';
+    chartDiv.appendChild(canvas);
+
+    inner.parentNode.insertBefore(chartDiv, inner);
+
+    // Draw sparkline
+    const ctx = canvas.getContext('2d');
+    const prices = data.candles.map((c) => c.close);
+    const min = Math.min(...prices);
+    const max = Math.max(...prices);
+    const range = max - min || 1;
+    const w = canvas.width;
+    const h = canvas.height;
+    const padding = 4;
+
+    // Gradient fill
+    const gradient = ctx.createLinearGradient(0, 0, 0, h);
+    gradient.addColorStop(0, 'rgba(0, 229, 159, 0.25)');
+    gradient.addColorStop(1, 'rgba(0, 229, 159, 0.0)');
+
+    ctx.beginPath();
+    prices.forEach((price, i) => {
+      const x = (i / (prices.length - 1)) * (w - padding * 2) + padding;
+      const y = h - padding - ((price - min) / range) * (h - padding * 2);
+      if (i === 0) ctx.moveTo(x, y);
+      else ctx.lineTo(x, y);
+    });
+
+    // Fill area
+    const lastX = (w - padding * 2) + padding;
+    ctx.lineTo(lastX, h);
+    ctx.lineTo(padding, h);
+    ctx.closePath();
+    ctx.fillStyle = gradient;
+    ctx.fill();
+
+    // Draw line on top
+    ctx.beginPath();
+    prices.forEach((price, i) => {
+      const x = (i / (prices.length - 1)) * (w - padding * 2) + padding;
+      const y = h - padding - ((price - min) / range) * (h - padding * 2);
+      if (i === 0) ctx.moveTo(x, y);
+      else ctx.lineTo(x, y);
+    });
+    ctx.strokeStyle = '#00e59f';
+    ctx.lineWidth = 1.5;
+    ctx.stroke();
+  } catch (e) {
+    // Silent fail — chart is optional
   }
 }
 
@@ -805,6 +905,8 @@ async function injectB4EWidget(anchorEl, title, platform, extra) {
     try {
       const brief = await fetchBrief(title, extra, refresh);
       renderBrief(widget, brief, platform, () => loadBrief(true));
+      // Load chart after brief renders (non-blocking)
+      loadChartInWidget(widget, title);
     } catch (err) {
       if (err.rateLimited) {
         renderRateLimit(widget, err.message, platform);

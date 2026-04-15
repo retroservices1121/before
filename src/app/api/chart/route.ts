@@ -45,10 +45,15 @@ const COINGECKO_ID_MAP: Record<string, string> = {
 
 function extractCoinGeckoId(title: string): string | null {
   const lower = title.toLowerCase();
-  for (const [keyword, coinId] of Object.entries(COINGECKO_ID_MAP)) {
-    // Match whole words to avoid false positives (e.g. "sol" in "resolution")
-    const regex = new RegExp(`\\b${keyword}\\b`, 'i');
-    if (regex.test(lower)) return coinId;
+  // Sort by keyword length descending so "solana" matches before "sol"
+  const sorted = Object.entries(COINGECKO_ID_MAP).sort((a, b) => b[0].length - a[0].length);
+  for (const [keyword, coinId] of sorted) {
+    const idx = lower.indexOf(keyword);
+    if (idx === -1) continue;
+    // Check word boundaries manually to avoid "sol" matching "resolution"
+    const before = idx === 0 || /\W/.test(lower[idx - 1]);
+    const after = idx + keyword.length >= lower.length || /\W/.test(lower[idx + keyword.length]);
+    if (before && after) return coinId;
   }
   return null;
 }

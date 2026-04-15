@@ -112,6 +112,10 @@ export async function getMarket(slug: string): Promise<Market | null> {
     }
   }
 
+  // Try Polymarket direct lookup (slug might be a Polymarket event slug)
+  const polymarket = await getPolymarketBySlug(parts[0] || slug);
+  if (polymarket) return polymarket;
+
   // Fallback: search by title keywords (for old-format slugs / mock data)
   const searchTerm = (parts[0] || slug).replace(/-/g, ' ');
   const searchData = await spreddFetch<SpreddMarket[]>(
