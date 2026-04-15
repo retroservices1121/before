@@ -1,8 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { isCryptoMarket } from '@/lib/tokens';
 
-const TOKENS_API_URL = process.env.TOKENS_API_URL || 'https://api.tokens.xyz';
-const TOKENS_API_KEY = process.env.TOKENS_API_KEY || '';
+const COINGECKO_API = 'https://api.coingecko.com/api/v3';
 
 const CORS_HEADERS = {
   'Access-Control-Allow-Origin': '*',
@@ -10,27 +9,46 @@ const CORS_HEADERS = {
   'Access-Control-Allow-Headers': 'Content-Type',
 };
 
-// Map common names to Tokens API asset IDs
-const ASSET_ID_MAP: Record<string, string> = {
-  bitcoin: 'btc', btc: 'btc',
-  ethereum: 'eth', eth: 'eth',
+// Map common market title keywords to CoinGecko coin IDs
+const COINGECKO_ID_MAP: Record<string, string> = {
+  bitcoin: 'bitcoin', btc: 'bitcoin',
+  ethereum: 'ethereum', eth: 'ethereum',
   solana: 'solana', sol: 'solana',
-  dogecoin: 'doge', doge: 'doge',
-  xrp: 'xrp', ripple: 'xrp',
-  cardano: 'ada', ada: 'ada',
-  avalanche: 'avax', avax: 'avax',
-  polygon: 'matic', matic: 'matic',
-  chainlink: 'link', link: 'link',
-  litecoin: 'ltc', ltc: 'ltc',
-  polkadot: 'dot', dot: 'dot',
-  bnb: 'bnb', sui: 'sui', aptos: 'aptos',
-  near: 'near', cosmos: 'atom', atom: 'atom',
+  dogecoin: 'dogecoin', doge: 'dogecoin',
+  xrp: 'ripple', ripple: 'ripple',
+  cardano: 'cardano', ada: 'cardano',
+  avalanche: 'avalanche-2', avax: 'avalanche-2',
+  polygon: 'matic-network', matic: 'matic-network',
+  chainlink: 'chainlink', link: 'chainlink',
+  litecoin: 'litecoin', ltc: 'litecoin',
+  polkadot: 'polkadot', dot: 'polkadot',
+  bnb: 'binancecoin', binance: 'binancecoin',
+  sui: 'sui', aptos: 'aptos',
+  near: 'near', cosmos: 'cosmos', atom: 'cosmos',
+  toncoin: 'the-open-network', ton: 'the-open-network',
+  tron: 'tron', trx: 'tron',
+  shiba: 'shiba-inu', shib: 'shiba-inu',
+  pepe: 'pepe',
+  uniswap: 'uniswap', uni: 'uniswap',
+  aave: 'aave',
+  arbitrum: 'arbitrum', arb: 'arbitrum',
+  optimism: 'optimism', op: 'optimism',
+  celestia: 'celestia', tia: 'celestia',
+  jupiter: 'jupiter-exchange-solana', jup: 'jupiter-exchange-solana',
+  render: 'render-token', rndr: 'render-token',
+  injective: 'injective-protocol', inj: 'injective-protocol',
+  sei: 'sei-network',
+  stacks: 'blockstack', stx: 'blockstack',
+  mantle: 'mantle', mnt: 'mantle',
+  gold: 'tether-gold', xaut: 'tether-gold',
 };
 
-function extractAssetId(title: string): string | null {
+function extractCoinGeckoId(title: string): string | null {
   const lower = title.toLowerCase();
-  for (const [keyword, assetId] of Object.entries(ASSET_ID_MAP)) {
-    if (lower.includes(keyword)) return assetId;
+  for (const [keyword, coinId] of Object.entries(COINGECKO_ID_MAP)) {
+    // Match whole words to avoid false positives (e.g. "sol" in "resolution")
+    const regex = new RegExp(`\\b${keyword}\\b`, 'i');
+    if (regex.test(lower)) return coinId;
   }
   return null;
 }
@@ -58,52 +76,66 @@ export async function GET(request: NextRequest) {
     );
   }
 
-  const assetId = extractAssetId(title);
-  if (!assetId) {
+  const coinId = extractCoinGeckoId(title);
+  if (!coinId) {
     return NextResponse.json(
       { error: 'Could not identify asset from title' },
       { status: 404, headers: CORS_HEADERS }
     );
   }
 
-  if (!TOKENS_API_KEY) {
-    return NextResponse.json(
-      { error: 'Tokens API not configured' },
-      { status: 503, headers: CORS_HEADERS }
-    );
-  }
-
   try {
-    const from = Math.floor(Date.now() / 1000) - days * 86400;
     const res = await fetch(
-      `${TOKENS_API_URL}/v1/assets/${assetId}/ohlcv?interval=1D&from=${from}`,
+      `${COINGECKO_API}/coins/${coinId}/market_chart?vs_currency=usd&days=${days}&interval=daily`,
       {
-        headers: {
-          'x-api-key': TOKENS_API_KEY,
-          'Content-Type': 'application/json',
-        },
+        headers: { 'Accept': 'application/json' },
       }
     );
 
+    if (res.status === 429) {
+      return NextResponse.json(
+        { error: 'CoinGecko rate limit, try again shortly' },
+        { status: 429, headers: CORS_HEADERS }
+      );
+    }
+
     if (!res.ok) {
       return NextResponse.json(
-        { error: `Tokens API returned ${res.status}` },
+        { error: `CoinGecko returned ${res.status}` },
         { status: 502, headers: CORS_HEADERS }
       );
     }
 
     const data = await res.json();
-    const candles = (data?.candles || []).map((c: any) => ({
-      time: c.time || c.timestamp || c.t,
-      open: c.open || c.o,
-      high: c.high || c.h,
-      low: c.low || c.l,
-      close: c.close || c.c,
-      volume: c.volume || c.v,
-    }));
+
+    // CoinGecko returns { prices: [[ts, price], ...], total_volumes: [[ts, vol], ...] }
+    const prices: [number, number][] = data.prices || [];
+    const volumes: [number, number][] = data.total_volumes || [];
+
+    // Build a volume lookup by day (rounded to start of day)
+    const volumeByDay = new Map<string, number>();
+    for (const [ts, vol] of volumes) {
+      const day = new Date(ts).toISOString().slice(0, 10);
+      volumeByDay.set(day, vol);
+    }
+
+    // Convert to candle-like format for the chart component
+    // CoinGecko daily data gives one price point per day, so open/high/low = close
+    const candles = prices.map(([ts, price], i) => {
+      const day = new Date(ts).toISOString().slice(0, 10);
+      const prevPrice = i > 0 ? prices[i - 1][1] : price;
+      return {
+        time: Math.floor(ts / 1000),
+        open: prevPrice,
+        high: Math.max(prevPrice, price),
+        low: Math.min(prevPrice, price),
+        close: price,
+        volume: volumeByDay.get(day) || 0,
+      };
+    });
 
     return NextResponse.json(
-      { assetId, interval: '1D', candles },
+      { assetId: coinId, interval: '1D', candles },
       {
         headers: {
           ...CORS_HEADERS,
