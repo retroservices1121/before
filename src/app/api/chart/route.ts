@@ -124,11 +124,19 @@ export async function GET(request: NextRequest) {
       volumeByDay.set(day, vol);
     }
 
-    // Convert to candle-like format for the chart component
-    // CoinGecko daily data gives one price point per day, so open/high/low = close
-    const candles = prices.map(([ts, price], i) => {
+    // Deduplicate by day — CoinGecko returns a duplicate entry for today
+    const seenDays = new Set<string>();
+    const dedupedPrices = prices.filter(([ts]) => {
       const day = new Date(ts).toISOString().slice(0, 10);
-      const prevPrice = i > 0 ? prices[i - 1][1] : price;
+      if (seenDays.has(day)) return false;
+      seenDays.add(day);
+      return true;
+    });
+
+    // Convert to candle-like format for the chart component
+    const candles = dedupedPrices.map(([ts, price], i) => {
+      const day = new Date(ts).toISOString().slice(0, 10);
+      const prevPrice = i > 0 ? dedupedPrices[i - 1][1] : price;
       return {
         time: Math.floor(ts / 1000),
         open: prevPrice,

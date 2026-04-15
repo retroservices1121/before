@@ -1,9 +1,9 @@
 import { ImageResponse } from 'next/og';
 import { NextRequest } from 'next/server';
+import { readFileSync } from 'fs';
+import { join } from 'path';
 
-export const runtime = 'edge';
-
-const APP_URL = process.env.NEXT_PUBLIC_APP_URL || 'https://b4enews.com';
+export const runtime = 'nodejs';
 
 export async function GET(request: NextRequest) {
   const params = request.nextUrl.searchParams;
@@ -62,16 +62,15 @@ export async function GET(request: NextRequest) {
   const isMultiOutcome = outcomeList.length > 0;
   const hasBriefData = summary || factorList.length > 0;
 
-  // Fetch the background image as base64
-  let bgSrc = `${APP_URL}/og.png`;
+  // Read the background image as base64 from the public directory
+  let bgSrc = '';
   try {
-    const bgRes = await fetch(bgSrc);
-    if (bgRes.ok) {
-      const buf = await bgRes.arrayBuffer();
-      const b64 = Buffer.from(buf).toString('base64');
-      bgSrc = `data:image/png;base64,${b64}`;
-    }
-  } catch {}
+    const imgPath = join(process.cwd(), 'public', 'og.png');
+    const buf = readFileSync(imgPath);
+    bgSrc = `data:image/png;base64,${buf.toString('base64')}`;
+  } catch (e) {
+    console.error('Failed to read og.png:', e);
+  }
 
   return new ImageResponse(
     (

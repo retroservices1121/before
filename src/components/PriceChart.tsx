@@ -136,7 +136,9 @@ export default function PriceChart({ title, category }: Props) {
       chartRef.current = chart;
     }
 
-    renderChart();
+    renderChart().catch((err) => {
+      console.error('Chart render error:', err);
+    });
 
     // Resize handler
     const resizeHandler = () => {
