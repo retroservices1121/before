@@ -18,6 +18,18 @@ export interface Market {
   updatedAt?: string;
 }
 
+export interface CryptoStats {
+  name: string;
+  symbol: string;
+  price: number;
+  priceChange24h?: number;
+  priceChange7d?: number;
+  marketCap?: number;
+  volume24h?: number;
+  riskLevel?: string;
+  riskScore?: string;
+}
+
 export interface ContextBrief {
   marketId: string;
   summary: string;
@@ -28,6 +40,7 @@ export interface ContextBrief {
   }[];
   historicalBaseRate?: string;
   upcomingCatalysts?: string[];
+  cryptoStats?: CryptoStats;
   generatedAt: string;
 }
 

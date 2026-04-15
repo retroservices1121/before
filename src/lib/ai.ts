@@ -1,4 +1,4 @@
-import { Market, ContextBrief } from './types';
+import { Market, ContextBrief, CryptoStats } from './types';
 import { crawlMarketContext } from './tinyfish';
 import { getSpreadContext, formatSpreadForPrompt } from './spread';
 import { enrichCryptoMarket, formatEnrichmentForPrompt } from './tokens';
@@ -49,6 +49,25 @@ export async function generateContextBrief(market: Market): Promise<ContextBrief
     ? `\n\n${formatEnrichmentForPrompt(cryptoEnrichment)}`
     : '';
 
+  // Build crypto stats for the frontend
+  let cryptoStats: CryptoStats | undefined;
+  if (cryptoEnrichment?.asset) {
+    const a = cryptoEnrichment.asset;
+    if (a.price && a.name && a.symbol) {
+      cryptoStats = {
+        name: a.name,
+        symbol: a.symbol,
+        price: a.price,
+        priceChange24h: a.priceChange24h ?? undefined,
+        priceChange7d: a.priceChange7d ?? undefined,
+        marketCap: a.marketCap ?? undefined,
+        volume24h: a.volume24h ?? undefined,
+        riskLevel: cryptoEnrichment.risk?.level ?? undefined,
+        riskScore: cryptoEnrichment.risk?.score ?? undefined,
+      };
+    }
+  }
+
   // Step 3: Gemini synthesizes everything
   const today = new Date().toISOString().slice(0, 10);
 
@@ -65,17 +84,18 @@ export async function generateContextBrief(market: Market): Promise<ContextBrief
   let marketTypeInstruction: string;
 
   if (isMultiOutcome) {
-    // Multi-outcome: show top 3 by probability
     const sorted = Object.entries(market.outcomes!)
       .sort((a, b) => b[1] - a[1]);
-    const top3 = sorted.slice(0, 3);
-    const outcomeLines = top3
-      .map(([name, prob]) => `${name}: ${(prob * 100).toFixed(1)}%`)
-      .join(' | ');
+
+    // Show all outcomes so Gemini sees the full picture
+    const allOutcomeLines = sorted
+      .map(([name, prob]) => `  ${name}: ${(prob * 100).toFixed(1)}%`)
+      .join('\n');
+
     marketDataLine = hasMarketData
-      ? `Top outcomes: ${outcomeLines} | ${sorted.length} total outcomes | Volume: $${market.volume.toLocaleString()} | Platform: ${market.platform}`
+      ? `${sorted.length} sub-markets | Volume: $${market.volume.toLocaleString()} | Platform: ${market.platform}\n\nAll outcomes:\n${allOutcomeLines}`
       : `Platform: ${market.platform} (No market data available)`;
-    marketTypeInstruction = `This is a MULTI-OUTCOME market with ${sorted.length} possible outcomes. Your summary MUST analyze the full competitive landscape, covering at least the top 3 outcomes by probability. Explain why the leader is ahead, what the runner-ups have going for them, and what could shift the ranking.`;
+    marketTypeInstruction = `This is a MULTI-OUTCOME event with ${sorted.length} sub-markets. Each sub-market is a separate yes/no question. Your summary MUST analyze the full landscape: what the market collectively implies (e.g., the expected price range, the most likely winner, the probability distribution), which outcomes are most and least likely, and why. Cover the top 3-5 most interesting outcomes. Do NOT focus on just one sub-market.`;
   } else {
     // Binary yes/no market
     const yesProb = market.probability;
@@ -146,6 +166,7 @@ JSON response:
       keyFactors: parsed.keyFactors,
       historicalBaseRate: parsed.historicalBaseRate,
       upcomingCatalysts: parsed.upcomingCatalysts,
+      cryptoStats,
       generatedAt: new Date().toISOString(),
     };
   } catch (error) {
@@ -164,6 +185,7 @@ JSON response:
       ],
       historicalBaseRate: 'Historical base rate data unavailable. Connect your Gemini API key for AI-generated context.',
       upcomingCatalysts: market.endDate ? [`Market resolves: ${market.endDate}`] : [],
+      cryptoStats,
       generatedAt: new Date().toISOString(),
     };
   }

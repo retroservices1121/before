@@ -160,16 +160,55 @@ export async function getPolymarketBySlug(eventSlug: string): Promise<Market | n
     if (!Array.isArray(events) || events.length === 0) return null;
 
     const event = events[0];
-    // Get the first (primary) market from the event
-    const mkt = event.markets?.[0] || event;
+    const markets = event.markets || [];
 
+    if (markets.length === 0) return null;
+
+    // Multi-market event: build outcomes map from all sub-markets
+    // Single-market event: treat as binary yes/no
+    if (markets.length > 1) {
+      const outcomes: Record<string, number> = {};
+      let totalVolume = 0;
+
+      for (const m of markets) {
+        const prices = m.outcomePrices ? JSON.parse(m.outcomePrices) : [];
+        const yesPrice = prices.length > 0 ? parseFloat(prices[0]) : 0;
+        const question = m.question || m.title || '';
+        outcomes[question] = yesPrice;
+        totalVolume += parseFloat(m.volume || '0');
+      }
+
+      // Use the highest-volume sub-market for the primary probability
+      const topMarket = markets.reduce((a: any, b: any) =>
+        parseFloat(b.volume || '0') > parseFloat(a.volume || '0') ? b : a
+      );
+      const topPrices = topMarket.outcomePrices ? JSON.parse(topMarket.outcomePrices) : [];
+
+      return {
+        id: `polymarket-${event.id}`,
+        slug: eventSlug,
+        title: event.title || eventSlug,
+        description: event.description,
+        probability: topPrices.length > 0 ? parseFloat(topPrices[0]) : 0,
+        volume: totalVolume,
+        platform: 'polymarket',
+        category: event.category || undefined,
+        endDate: topMarket.endDate || event.endDate,
+        url: `https://polymarket.com/event/${eventSlug}`,
+        conditionId: topMarket.conditionId || undefined,
+        outcomes,
+      };
+    }
+
+    // Single sub-market: binary yes/no
+    const mkt = markets[0];
     const prices = mkt.outcomePrices ? JSON.parse(mkt.outcomePrices) : [];
     const probability = prices.length > 0 ? parseFloat(prices[0]) : 0;
 
     return {
       id: `polymarket-${mkt.id || event.id}`,
       slug: eventSlug,
-      title: event.title || mkt.title || eventSlug,
+      title: event.title || mkt.question || mkt.title || eventSlug,
       description: event.description || mkt.description,
       probability,
       volume: parseFloat(mkt.volume || event.volume || '0'),
