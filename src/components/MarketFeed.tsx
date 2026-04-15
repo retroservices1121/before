@@ -40,7 +40,7 @@ export default function MarketFeed({ markets }: { markets: Market[] }) {
           <button
             key={cat}
             onClick={() => setActive(cat)}
-            className={`font-mono text-[10px] tracking-[1.5px] uppercase px-4 py-2 rounded border transition-all whitespace-nowrap ${
+            className={`font-mono text-[11px] md:text-[10px] tracking-[1.5px] uppercase px-3 py-2.5 md:px-4 md:py-2 rounded border transition-all whitespace-nowrap ${
               cat === active
                 ? 'bg-b4e-accent/10 border-b4e-accent text-b4e-accent'
                 : 'bg-transparent border-b4e-border text-b4e-text-muted hover:border-b4e-border-accent hover:text-b4e-text-dim'

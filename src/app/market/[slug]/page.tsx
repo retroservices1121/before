@@ -68,7 +68,7 @@ export default async function MarketPage({ params }: PageProps) {
   const changeBg = changePositive ? 'bg-b4e-accent/10' : 'bg-b4e-warm/10';
 
   return (
-    <div className="max-w-4xl mx-auto px-4 py-10">
+    <div className="max-w-4xl mx-auto px-4 py-6 md:py-10">
       {/* Back link */}
       <Link
         href="/"
@@ -80,7 +80,7 @@ export default async function MarketPage({ params }: PageProps) {
       {/* Market header */}
       <div className="mb-8">
         {/* Platform + category */}
-        <div className="flex items-center gap-3 mb-4">
+        <div className="flex items-center gap-2 md:gap-3 mb-4 flex-wrap">
           <span
             className={`font-mono text-[9px] tracking-[1.5px] uppercase font-semibold px-2 py-0.5 rounded-sm ${
               market.platform === 'polymarket'
@@ -107,18 +107,18 @@ export default async function MarketPage({ params }: PageProps) {
         </div>
 
         {/* Title */}
-        <h1 className="font-serif text-3xl md:text-4xl font-normal tracking-tight mb-6 leading-tight">
+        <h1 className="font-serif text-xl sm:text-2xl md:text-3xl lg:text-4xl font-normal tracking-tight mb-6 leading-tight">
           {market.title}
         </h1>
 
         {/* Stats row */}
-        <div className="flex items-center gap-6 flex-wrap">
+        <div className="flex items-center gap-3 md:gap-6 flex-wrap">
           {/* Probability */}
           <div>
             <div className="font-mono text-[9px] tracking-[2px] uppercase text-b4e-text-muted mb-1">
               Probability
             </div>
-            <span className="font-mono text-4xl font-bold text-b4e-accent">
+            <span className="font-mono text-2xl md:text-4xl font-bold text-b4e-accent">
               {formatProbability(market.probability)}
             </span>
           </div>
@@ -201,7 +201,7 @@ export default async function MarketPage({ params }: PageProps) {
           href={market.url}
           target="_blank"
           rel="noopener noreferrer"
-          className="inline-flex items-center gap-2 font-mono text-[12px] tracking-[1px] px-6 py-3 bg-b4e-accent text-b4e-bg font-semibold rounded hover:shadow-[0_0_30px_rgba(0,229,159,0.15)] transition-all no-underline"
+          className="inline-flex items-center justify-center gap-2 font-mono text-[12px] tracking-[1px] px-6 py-3 w-full sm:w-auto bg-b4e-accent text-b4e-bg font-semibold rounded hover:shadow-[0_0_30px_rgba(0,229,159,0.15)] transition-all no-underline"
         >
           Trade this market &rarr;
         </a>

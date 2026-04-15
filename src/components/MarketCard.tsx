@@ -18,8 +18,8 @@ export default function MarketCard({ market }: { market: Market }) {
       className="block bg-b4e-surface border-l-2 border-b4e-border hover:border-b4e-accent hover:bg-b4e-surface-2 transition-all duration-300 p-6 no-underline group"
     >
       {/* Top row: platform + category */}
-      <div className="flex items-center justify-between mb-3">
-        <div className="flex items-center gap-3">
+      <div className="flex items-center justify-between mb-3 flex-wrap gap-1">
+        <div className="flex items-center gap-2 md:gap-3">
           <span
             className={`font-mono text-[9px] tracking-[1.5px] uppercase font-semibold px-2 py-0.5 rounded-sm ${
               market.platform === 'polymarket'

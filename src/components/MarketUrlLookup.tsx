@@ -72,7 +72,7 @@ export default function MarketUrlLookup() {
 
   return (
     <div className="mb-10">
-      <form onSubmit={handleSubmit} className="flex gap-2">
+      <form onSubmit={handleSubmit} className="flex flex-col sm:flex-row gap-2">
         <input
           type="text"
           value={url}
@@ -81,12 +81,12 @@ export default function MarketUrlLookup() {
             if (error) setError(null);
           }}
           placeholder="Paste a Polymarket, Limitless, or Kalshi URL..."
-          className="flex-1 bg-b4e-surface border border-b4e-border rounded px-4 py-2.5 font-mono text-[12px] text-b4e-text placeholder:text-b4e-text-muted/50 focus:outline-none focus:border-b4e-accent transition-colors"
+          className="flex-1 bg-b4e-surface border border-b4e-border rounded px-4 py-3 font-mono text-[13px] md:text-[12px] text-b4e-text placeholder:text-b4e-text-muted/50 focus:outline-none focus:border-b4e-accent transition-colors"
         />
         <button
           type="submit"
           disabled={loading || !url.trim()}
-          className="font-mono text-[10px] tracking-[1.5px] uppercase px-5 py-2.5 rounded bg-b4e-accent text-b4e-bg font-semibold hover:shadow-[0_0_20px_rgba(0,229,159,0.15)] transition-all disabled:opacity-40 disabled:cursor-not-allowed"
+          className="font-mono text-[11px] md:text-[10px] tracking-[1.5px] uppercase px-5 py-3 rounded bg-b4e-accent text-b4e-bg font-semibold hover:shadow-[0_0_20px_rgba(0,229,159,0.15)] transition-all disabled:opacity-40 disabled:cursor-not-allowed"
         >
           {loading ? 'Generating...' : 'Get Brief'}
         </button>

@@ -8,7 +8,7 @@ export default async function HomePage() {
   const markets = await getTrendingMarkets();
 
   return (
-    <div className="max-w-5xl mx-auto px-4 py-10">
+    <div className="max-w-5xl mx-auto px-4 py-6 md:py-10">
       {/* Header */}
       <div className="mb-10">
         <div className="flex items-center gap-3 mb-4">
@@ -17,10 +17,10 @@ export default async function HomePage() {
             Live Markets
           </span>
         </div>
-        <h1 className="font-serif text-4xl md:text-5xl font-normal tracking-tight mb-3">
+        <h1 className="font-serif text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-normal tracking-tight mb-3">
           Trending Markets
         </h1>
-        <p className="text-b4e-text-dim text-[16px] max-w-xl leading-relaxed">
+        <p className="text-b4e-text-dim text-[14px] md:text-[16px] max-w-xl leading-relaxed">
           High-volume prediction markets across Polymarket, Limitless, and Kalshi.
           Paste a market URL or click any market for an AI-generated context brief.
         </p>

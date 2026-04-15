@@ -34,17 +34,17 @@ export default function RootLayout({
       </head>
       <body>
         {/* Nav */}
-        <nav className="fixed top-0 left-0 right-0 z-50 px-6 py-4 flex justify-between items-center backdrop-blur-xl bg-b4e-bg/85 border-b border-b4e-border">
+        <nav className="fixed top-0 left-0 right-0 z-50 px-4 md:px-6 py-3 md:py-4 flex justify-between items-center backdrop-blur-xl bg-b4e-bg/85 border-b border-b4e-border">
           <Link
             href="/"
-            className="font-serif italic text-lg tracking-[3px] text-b4e-accent no-underline"
+            className="font-serif italic text-base md:text-lg tracking-[3px] text-b4e-accent no-underline"
           >
             before
           </Link>
-          <div className="flex items-center gap-6">
+          <div className="flex items-center gap-3 md:gap-6">
             <Link
               href="/markets"
-              className="font-mono text-[10px] tracking-[2px] uppercase text-b4e-text-muted hover:text-b4e-text-dim transition-colors no-underline"
+              className="font-mono text-[11px] md:text-[10px] tracking-[2px] uppercase text-b4e-text-muted hover:text-b4e-text-dim transition-colors no-underline py-1"
             >
               Markets
             </Link>
@@ -52,7 +52,7 @@ export default function RootLayout({
               href="https://docs.b4enews.com"
               target="_blank"
               rel="noopener noreferrer"
-              className="font-mono text-[10px] tracking-[2px] uppercase text-b4e-text-muted hover:text-b4e-text-dim transition-colors no-underline"
+              className="font-mono text-[11px] md:text-[10px] tracking-[2px] uppercase text-b4e-text-muted hover:text-b4e-text-dim transition-colors no-underline py-1 hidden sm:block"
             >
               Docs
             </a>
@@ -66,7 +66,7 @@ export default function RootLayout({
         <main className="pt-[72px] min-h-screen">{children}</main>
 
         {/* Footer */}
-        <footer className="px-6 py-8 border-t border-b4e-border flex justify-between items-center">
+        <footer className="px-4 md:px-6 py-6 md:py-8 border-t border-b4e-border flex flex-col sm:flex-row justify-between items-center gap-2">
           <span className="font-mono text-[11px] text-b4e-text-muted tracking-wide">
             &copy; 2026 <span className="font-serif italic text-b4e-text-dim">before</span>
           </span>

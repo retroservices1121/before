@@ -29,10 +29,10 @@ export default function CryptoStatsBar({ stats }: { stats: CryptoStats }) {
           {stats.name} ({stats.symbol.toUpperCase()})
         </span>
       </div>
-      <div className="flex items-center gap-6 flex-wrap">
+      <div className="grid grid-cols-2 sm:grid-cols-3 md:flex md:items-center gap-3 md:gap-6 flex-wrap">
         {/* Price */}
         <div>
-          <div className="font-mono text-[8px] tracking-[1.5px] uppercase text-b4e-text-muted mb-0.5">
+          <div className="font-mono text-[10px] md:text-[8px] tracking-[1.5px] uppercase text-b4e-text-muted mb-0.5">
             Price
           </div>
           <span className="font-mono text-lg font-bold text-b4e-text">
@@ -43,7 +43,7 @@ export default function CryptoStatsBar({ stats }: { stats: CryptoStats }) {
         {/* 24h Change */}
         {change24h != null && (
           <div>
-            <div className="font-mono text-[8px] tracking-[1.5px] uppercase text-b4e-text-muted mb-0.5">
+            <div className="font-mono text-[10px] md:text-[8px] tracking-[1.5px] uppercase text-b4e-text-muted mb-0.5">
               24h
             </div>
             <span className={`font-mono text-sm font-semibold px-2 py-0.5 rounded ${
@@ -61,7 +61,7 @@ export default function CryptoStatsBar({ stats }: { stats: CryptoStats }) {
         {/* 7d Change */}
         {change7d != null && (
           <div>
-            <div className="font-mono text-[8px] tracking-[1.5px] uppercase text-b4e-text-muted mb-0.5">
+            <div className="font-mono text-[10px] md:text-[8px] tracking-[1.5px] uppercase text-b4e-text-muted mb-0.5">
               7d
             </div>
             <span className={`font-mono text-sm font-semibold px-2 py-0.5 rounded ${
@@ -79,7 +79,7 @@ export default function CryptoStatsBar({ stats }: { stats: CryptoStats }) {
         {/* Market Cap */}
         {stats.marketCap != null && (
           <div>
-            <div className="font-mono text-[8px] tracking-[1.5px] uppercase text-b4e-text-muted mb-0.5">
+            <div className="font-mono text-[10px] md:text-[8px] tracking-[1.5px] uppercase text-b4e-text-muted mb-0.5">
               Mkt Cap
             </div>
             <span className="font-mono text-sm text-b4e-text-dim">
@@ -91,7 +91,7 @@ export default function CryptoStatsBar({ stats }: { stats: CryptoStats }) {
         {/* 24h Volume */}
         {stats.volume24h != null && (
           <div>
-            <div className="font-mono text-[8px] tracking-[1.5px] uppercase text-b4e-text-muted mb-0.5">
+            <div className="font-mono text-[10px] md:text-[8px] tracking-[1.5px] uppercase text-b4e-text-muted mb-0.5">
               24h Vol
             </div>
             <span className="font-mono text-sm text-b4e-text-dim">
@@ -103,7 +103,7 @@ export default function CryptoStatsBar({ stats }: { stats: CryptoStats }) {
         {/* Risk */}
         {stats.riskLevel && (
           <div>
-            <div className="font-mono text-[8px] tracking-[1.5px] uppercase text-b4e-text-muted mb-0.5">
+            <div className="font-mono text-[10px] md:text-[8px] tracking-[1.5px] uppercase text-b4e-text-muted mb-0.5">
               Risk
             </div>
             <span className="font-mono text-sm text-b4e-amber">

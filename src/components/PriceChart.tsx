@@ -69,9 +69,11 @@ export default function PriceChart({ title, category }: Props) {
 
       if (!chartContainerRef.current) return;
 
+      const chartHeight = window.innerWidth < 640 ? 200 : 300;
+
       chart = createChart(chartContainerRef.current, {
         width: chartContainerRef.current.clientWidth,
-        height: 300,
+        height: chartHeight,
         layout: {
           background: { type: ColorType.Solid, color: '#111111' },
           textColor: '#525252',
@@ -178,7 +180,7 @@ export default function PriceChart({ title, category }: Props) {
       </div>
       <div className="bg-b4e-surface border border-b4e-border rounded-xl overflow-hidden">
         {loading ? (
-          <div className="h-[300px] flex items-center justify-center">
+          <div className="h-[200px] sm:h-[300px] flex items-center justify-center">
             <div className="flex items-center gap-3">
               <div className="w-5 h-5 border-2 border-b4e-border border-t-b4e-accent rounded-full animate-spin" />
               <span className="font-mono text-[11px] text-b4e-text-muted">Loading chart...</span>

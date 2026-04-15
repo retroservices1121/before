@@ -128,7 +128,7 @@ export default function ContextBrief({ brief }: { brief: ContextBriefType }) {
         </div>
 
         {/* Share footer */}
-        <div className="px-5 py-3 border-t border-b4e-border flex items-center justify-end gap-3">
+        <div className="px-5 py-3 border-t border-b4e-border flex items-center justify-end gap-2 md:gap-3">
           <button
             onClick={handleCopyLink}
             className="font-mono text-[10px] tracking-[1px] text-b4e-text-muted hover:text-b4e-accent transition-colors"
@@ -139,7 +139,7 @@ export default function ContextBrief({ brief }: { brief: ContextBriefType }) {
             onClick={handleShareToX}
             className="font-mono text-[10px] tracking-[1px] px-3 py-1.5 rounded bg-b4e-accent/10 border border-b4e-accent/25 text-b4e-accent hover:bg-b4e-accent/20 transition-colors"
           >
-            Share on X
+            Share
           </button>
         </div>
       </div>
