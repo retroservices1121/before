@@ -20,12 +20,7 @@ export default function ContextBrief({ brief }: { brief: ContextBriefType }) {
   }
 
   function handleCopyLink() {
-    const url = window.location.href;
-    const summary = brief.summary.length > 200
-      ? brief.summary.slice(0, 197) + '...'
-      : brief.summary;
-    const text = `${summary}\n\n${url}`;
-    navigator.clipboard.writeText(text).then(() => {
+    navigator.clipboard.writeText(window.location.href).then(() => {
       setCopied(true);
       setTimeout(() => setCopied(false), 2000);
     });

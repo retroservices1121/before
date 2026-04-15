@@ -32,7 +32,6 @@ export default function PriceChart({ title, category }: Props) {
         const res = await fetch(`/api/chart?${params.toString()}`);
         if (!res.ok) {
           if (res.status === 404) {
-            // Not a chartable market, hide silently
             setError('skip');
             return;
           }
@@ -60,7 +59,13 @@ export default function PriceChart({ title, category }: Props) {
     let chart: any;
 
     async function renderChart() {
-      const { createChart, ColorType, LineStyle } = await import('lightweight-charts');
+      const {
+        createChart,
+        AreaSeries,
+        HistogramSeries,
+        ColorType,
+        LineStyle,
+      } = await import('lightweight-charts');
 
       if (!chartContainerRef.current) return;
 
@@ -91,8 +96,8 @@ export default function PriceChart({ title, category }: Props) {
         },
       });
 
-      // Area series for the price line
-      const areaSeries = chart.addAreaSeries({
+      // Area series for the price line (v5 API)
+      const areaSeries = chart.addSeries(AreaSeries, {
         topColor: 'rgba(0, 229, 159, 0.25)',
         bottomColor: 'rgba(0, 229, 159, 0.0)',
         lineColor: '#00e59f',
@@ -104,8 +109,8 @@ export default function PriceChart({ title, category }: Props) {
         },
       });
 
-      // Volume histogram
-      const volumeSeries = chart.addHistogramSeries({
+      // Volume histogram (v5 API)
+      const volumeSeries = chart.addSeries(HistogramSeries, {
         color: 'rgba(0, 229, 159, 0.15)',
         priceFormat: { type: 'volume' },
         priceScaleId: '',

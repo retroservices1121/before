@@ -711,11 +711,7 @@ function renderBrief(host, brief, platform, refreshFn) {
   const toast = body.querySelector('.b4e-share-toast');
   if (shareBtn) {
     shareBtn.addEventListener('click', () => {
-      const summary = brief.summary
-        ? (brief.summary.length > 200 ? brief.summary.slice(0, 197) + '...' : brief.summary)
-        : '';
-      const shareText = summary ? `${summary}\n\n${marketUrl}` : marketUrl;
-      navigator.clipboard.writeText(shareText).then(() => {
+      navigator.clipboard.writeText(marketUrl).then(() => {
         if (toast) {
           toast.classList.add('show');
           setTimeout(() => toast.classList.remove('show'), 2000);
