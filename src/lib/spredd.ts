@@ -116,6 +116,10 @@ export async function getMarket(slug: string): Promise<Market | null> {
   const polymarket = await getPolymarketBySlug(parts[0] || slug);
   if (polymarket) return polymarket;
 
+  // Try Kalshi direct lookup (slug might be a Kalshi event ticker)
+  const kalshi = await getKalshiEvent((parts[0] || slug).toUpperCase());
+  if (kalshi) return kalshi;
+
   // Fallback: search by title keywords (for old-format slugs / mock data)
   const searchTerm = (parts[0] || slug).replace(/-/g, ' ');
   const searchData = await spreddFetch<SpreddMarket[]>(
@@ -342,6 +346,115 @@ export async function getDFlowMarket(ticker: string): Promise<Market | null> {
   } catch (error) {
     console.error('DFlow API lookup failed:', error);
     return null;
+  }
+}
+
+/**
+ * Direct Kalshi API integration.
+ * Public endpoints — no auth required for reading market data.
+ */
+const KALSHI_API = 'https://api.elections.kalshi.com/trade-api/v2';
+
+export async function getKalshiEvent(eventTicker: string): Promise<Market | null> {
+  try {
+    const res = await fetch(
+      `${KALSHI_API}/events/${encodeURIComponent(eventTicker)}?with_nested_markets=true`,
+      { next: { revalidate: 60 } }
+    );
+    if (!res.ok) return null;
+
+    const data = await res.json();
+    const event = data.event;
+    if (!event) return null;
+
+    const markets = event.markets || [];
+    if (markets.length === 0) return null;
+
+    if (markets.length > 1) {
+      // Multi-market event: build outcomes
+      const outcomes: Record<string, number> = {};
+      let totalVolume = 0;
+      for (const m of markets) {
+        const price = parseFloat(m.last_price_dollars || m.yes_bid_dollars || '0');
+        outcomes[m.title || m.ticker] = price;
+        totalVolume += parseFloat(m.volume_fp || '0');
+      }
+
+      const topMarket = markets.reduce((a: any, b: any) =>
+        parseFloat(b.volume_fp || '0') > parseFloat(a.volume_fp || '0') ? b : a
+      );
+
+      return {
+        id: `kalshi-${event.event_ticker}`,
+        slug: event.event_ticker.toLowerCase(),
+        title: event.title,
+        description: topMarket.rules_primary || undefined,
+        probability: parseFloat(topMarket.last_price_dollars || '0'),
+        volume: totalVolume,
+        volume24h: markets.reduce((sum: number, m: any) => sum + parseFloat(m.volume_24h_fp || '0'), 0),
+        platform: 'kalshi',
+        category: event.category || undefined,
+        endDate: topMarket.close_time ? topMarket.close_time.slice(0, 10) : undefined,
+        url: `https://kalshi.com/markets/${event.event_ticker}`,
+        outcomes,
+      };
+    }
+
+    // Single market
+    const mkt = markets[0];
+    return {
+      id: `kalshi-${mkt.ticker}`,
+      slug: mkt.ticker.toLowerCase(),
+      title: event.title || mkt.title,
+      description: mkt.rules_primary || undefined,
+      probability: parseFloat(mkt.last_price_dollars || mkt.yes_bid_dollars || '0'),
+      volume: parseFloat(mkt.volume_fp || '0'),
+      volume24h: parseFloat(mkt.volume_24h_fp || '0'),
+      platform: 'kalshi',
+      category: event.category || undefined,
+      endDate: mkt.close_time ? mkt.close_time.slice(0, 10) : undefined,
+      url: `https://kalshi.com/markets/${mkt.ticker}`,
+    };
+  } catch (error) {
+    console.error('Kalshi API lookup failed:', error);
+    return null;
+  }
+}
+
+export async function searchKalshiEvents(query: string): Promise<Market[]> {
+  try {
+    // Kalshi doesn't have a search endpoint, so fetch recent events and filter
+    const res = await fetch(
+      `${KALSHI_API}/events?limit=50&status=open&with_nested_markets=true`,
+      { next: { revalidate: 60 } }
+    );
+    if (!res.ok) return [];
+
+    const data = await res.json();
+    const events = data.events || [];
+
+    const lower = query.toLowerCase();
+    const matched = events.filter((e: any) =>
+      e.title?.toLowerCase().includes(lower) ||
+      e.event_ticker?.toLowerCase().includes(lower)
+    );
+
+    return matched.slice(0, 3).map((event: any) => {
+      const mkt = event.markets?.[0];
+      return {
+        id: `kalshi-${event.event_ticker}`,
+        slug: event.event_ticker.toLowerCase(),
+        title: event.title,
+        probability: mkt ? parseFloat(mkt.last_price_dollars || '0') : 0,
+        volume: event.markets?.reduce((sum: number, m: any) => sum + parseFloat(m.volume_fp || '0'), 0) || 0,
+        platform: 'kalshi' as const,
+        category: event.category || undefined,
+        endDate: mkt?.close_time?.slice(0, 10),
+        url: `https://kalshi.com/markets/${event.event_ticker}`,
+      };
+    });
+  } catch {
+    return [];
   }
 }
 

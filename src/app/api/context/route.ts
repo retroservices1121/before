@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createHash } from 'crypto';
-import { getMarket, searchMarkets, getPolymarketBySlug, getDFlowMarket, getLimitlessMarket, searchLimitlessMarkets } from '@/lib/spredd';
+import { getMarket, searchMarkets, getPolymarketBySlug, getDFlowMarket, getLimitlessMarket, searchLimitlessMarkets, getKalshiEvent, searchKalshiEvents } from '@/lib/spredd';
 import { generateContextBrief } from '@/lib/ai';
 import { getSession } from '@/lib/auth';
 import { checkRateLimit, recordUsage, BETA_MODE } from '@/lib/rate-limit';
@@ -116,11 +116,15 @@ export async function GET(request: NextRequest) {
     if (!market) {
       market = await getMarket(`--${platform}--${encodeURIComponent(ticker.toLowerCase())}`);
     }
-    // 1b. DFlow API (for Kalshi markets on Solana)
+    // 1b. Kalshi direct API by ticker
+    if (!market) {
+      market = await getKalshiEvent(ticker);
+    }
+    // 1c. DFlow API (for Kalshi markets on Solana)
     if (!market) {
       market = await getDFlowMarket(ticker);
     }
-    // 1c. If all ticker lookups fail, go straight to synthetic market.
+    // 1d. If all ticker lookups fail, go straight to synthetic market.
     // Do NOT search Spredd by keywords - ticker searches return wrong results.
   } else {
     // NON-TICKER PATH: slug, platform API, and search fallbacks
@@ -134,14 +138,20 @@ export async function GET(request: NextRequest) {
     if (!market && eventSlug) {
       if (platform === 'limitless') {
         market = await getLimitlessMarket(eventSlug);
+      } else if (platform === 'kalshi') {
+        market = await getKalshiEvent(eventSlug);
       } else {
         market = await getPolymarketBySlug(eventSlug);
       }
     }
 
-    // 3b. Limitless search by title
+    // 3b. Platform-specific search by title
     if (!market && title && platform === 'limitless') {
       const results = await searchLimitlessMarkets(title);
+      if (results.length > 0) market = results[0];
+    }
+    if (!market && title && platform === 'kalshi') {
+      const results = await searchKalshiEvents(title);
       if (results.length > 0) market = results[0];
     }
 
@@ -153,7 +163,13 @@ export async function GET(request: NextRequest) {
       }
     }
 
-    // 5. Spredd search by slug keywords (last resort, only when no title available)
+    // 5. Kalshi search as fallback before slug keywords
+    if (!market && title) {
+      const kalshiResults = await searchKalshiEvents(title);
+      if (kalshiResults.length > 0) market = kalshiResults[0];
+    }
+
+    // 6. Spredd search by slug keywords (last resort, only when no title available)
     if (!market && slug && !title) {
       const searchTerm = slug.replace(/-/g, ' ');
       const results = await searchMarkets(searchTerm);
