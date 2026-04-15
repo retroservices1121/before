@@ -9,7 +9,6 @@ import {
   formatProbability,
   formatPriceChange,
   getPlatformLabel,
-  slugify,
 } from '@/lib/utils';
 
 export const dynamic = 'force-dynamic';
@@ -26,27 +25,31 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
 
   const ogImageParams = new URLSearchParams({
     title: market.title,
-    probability: formatProbability(market.probability),
     platform: market.platform,
     volume: formatVolume(market.volume),
   });
-  if (market.outcomes && Object.keys(market.outcomes).length >= 3) {
-    ogImageParams.set('outcomes', JSON.stringify(market.outcomes));
+  // Only add probability for binary markets (multi-outcome shows 0%)
+  if (!market.outcomes || Object.keys(market.outcomes).length < 3) {
+    ogImageParams.set('probability', formatProbability(market.probability));
   }
   const ogImageUrl = `${APP_URL}/api/brief-image?${ogImageParams.toString()}`;
 
+  const description = market.outcomes && Object.keys(market.outcomes).length >= 3
+    ? `${Object.keys(market.outcomes).length} outcomes — AI intelligence brief by before`
+    : `${formatProbability(market.probability)} probability — AI intelligence brief by before`;
+
   return {
     title: `${market.title} — before`,
-    description: `AI intelligence brief for "${market.title}" at ${formatProbability(market.probability)} probability.`,
+    description: `AI intelligence brief for "${market.title}"`,
     openGraph: {
       title: market.title,
-      description: `${formatProbability(market.probability)} probability — AI intelligence brief by before`,
-      images: [{ url: ogImageUrl, width: 600, height: 630 }],
+      description,
+      images: [{ url: ogImageUrl, width: 960, height: 540 }],
     },
     twitter: {
       card: 'summary_large_image',
       title: market.title,
-      description: `${formatProbability(market.probability)} probability — AI intelligence brief by before`,
+      description,
       images: [ogImageUrl],
     },
   };

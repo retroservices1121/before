@@ -1,9 +1,5 @@
 import { ImageResponse } from 'next/og';
 import { NextRequest } from 'next/server';
-import { readFileSync } from 'fs';
-import { join } from 'path';
-
-export const runtime = 'nodejs';
 
 export async function GET(request: NextRequest) {
   const params = request.nextUrl.searchParams;
@@ -62,14 +58,23 @@ export async function GET(request: NextRequest) {
   const isMultiOutcome = outcomeList.length > 0;
   const hasBriefData = summary || factorList.length > 0;
 
-  // Read the background image as base64 from the public directory
+  // Read og.png and convert to base64 data URI for Satori
   let bgSrc = '';
   try {
-    const imgPath = join(process.cwd(), 'public', 'og.png');
-    const buf = readFileSync(imgPath);
+    const { readFileSync } = require('fs');
+    const { join } = require('path');
+    const buf = readFileSync(join(process.cwd(), 'public', 'og.png'));
     bgSrc = `data:image/png;base64,${buf.toString('base64')}`;
-  } catch (e) {
-    console.error('Failed to read og.png:', e);
+  } catch {
+    // Fallback: try fetching from public URL
+    try {
+      const APP_URL = process.env.NEXT_PUBLIC_APP_URL || 'https://b4enews.com';
+      const res = await fetch(`${APP_URL}/og.png`);
+      if (res.ok) {
+        const buf = Buffer.from(await res.arrayBuffer());
+        bgSrc = `data:image/png;base64,${buf.toString('base64')}`;
+      }
+    } catch {}
   }
 
   return new ImageResponse(
