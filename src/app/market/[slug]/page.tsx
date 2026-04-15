@@ -13,7 +13,8 @@ import {
 
 export const dynamic = 'force-dynamic';
 
-const APP_URL = process.env.NEXT_PUBLIC_APP_URL || 'https://b4enews.com';
+// Hardcoded for OG images — NEXT_PUBLIC_APP_URL was leaking localhost into meta tags
+const APP_URL = 'https://b4enews.com';
 
 interface PageProps {
   params: { slug: string };

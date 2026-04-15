@@ -10,11 +10,7 @@ export default function ContextBrief({ brief }: { brief: ContextBriefType }) {
 
   function handleShareToX() {
     const url = window.location.href;
-    // Truncate summary to fit in a tweet with the URL
-    const summary = brief.summary.length > 200
-      ? brief.summary.slice(0, 197) + '...'
-      : brief.summary;
-    const text = `${summary}\n\nvia @b4e`;
+    const text = 'via @b4e';
     const xUrl = `https://x.com/intent/tweet?text=${encodeURIComponent(text)}&url=${encodeURIComponent(url)}`;
     window.open(xUrl, '_blank', 'width=550,height=420');
   }
