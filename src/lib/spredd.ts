@@ -131,9 +131,7 @@ export async function getMarket(slug: string): Promise<Market | null> {
     if (mapped.length > 0) return mapped[0];
   }
 
-  // Fallback to mock
-  const mocks = getMockMarkets();
-  return mocks.find((m) => m.slug === slug || m.slug.startsWith(parts[0])) || null;
+  return null;
 }
 
 export async function searchMarkets(query: string): Promise<Market[]> {
@@ -145,10 +143,7 @@ export async function searchMarkets(query: string): Promise<Market[]> {
     return data.map(mapSpreddMarket);
   }
 
-  // Fallback to mock
-  const mocks = getMockMarkets();
-  const lower = query.toLowerCase();
-  return mocks.filter((m) => m.title.toLowerCase().includes(lower));
+  return [];
 }
 
 /**
