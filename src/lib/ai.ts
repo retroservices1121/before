@@ -57,13 +57,37 @@ export async function generateContextBrief(market: Market): Promise<ContextBrief
     : `\nIMPORTANT: No live news data was available. Do NOT fabricate or assume facts about recent events, election results, who holds office, or outcomes you are uncertain about. Focus on structural factors, historical patterns, and the market data provided. If you are unsure who won a past election or what happened recently, say "based on market pricing" instead of guessing.`;
 
   const hasMarketData = market.volume > 0 || market.probability > 0;
-  const yesProb = market.probability;
-  const noProb = 1 - market.probability;
-  const leadOutcome = yesProb >= 0.5 ? 'Yes' : 'No';
-  const leadProb = yesProb >= 0.5 ? yesProb : noProb;
-  const marketDataLine = hasMarketData
-    ? `Yes: ${(yesProb * 100).toFixed(1)}% | No: ${(noProb * 100).toFixed(1)}% | Leading outcome: ${leadOutcome} at ${(leadProb * 100).toFixed(1)}% | Volume: $${market.volume.toLocaleString()} | Platform: ${market.platform}`
-    : `Platform: ${market.platform} (No market data available — analyze based on the event itself)`;
+
+  // Detect market type: multi-outcome (3+) vs binary (yes/no)
+  const isMultiOutcome = market.outcomes && Object.keys(market.outcomes).length >= 3;
+
+  let marketDataLine: string;
+  let marketTypeInstruction: string;
+
+  if (isMultiOutcome) {
+    // Multi-outcome: show top 3 by probability
+    const sorted = Object.entries(market.outcomes!)
+      .sort((a, b) => b[1] - a[1]);
+    const top3 = sorted.slice(0, 3);
+    const outcomeLines = top3
+      .map(([name, prob]) => `${name}: ${(prob * 100).toFixed(1)}%`)
+      .join(' | ');
+    marketDataLine = hasMarketData
+      ? `Top outcomes: ${outcomeLines} | ${sorted.length} total outcomes | Volume: $${market.volume.toLocaleString()} | Platform: ${market.platform}`
+      : `Platform: ${market.platform} (No market data available)`;
+    marketTypeInstruction = `This is a MULTI-OUTCOME market with ${sorted.length} possible outcomes. Your summary MUST analyze the full competitive landscape, covering at least the top 3 outcomes by probability. Explain why the leader is ahead, what the runner-ups have going for them, and what could shift the ranking.`;
+  } else {
+    // Binary yes/no market
+    const yesProb = market.probability;
+    const noProb = 1 - market.probability;
+    const leadOutcome = yesProb >= 0.5 ? 'Yes' : 'No';
+    const leadProb = yesProb >= 0.5 ? yesProb : noProb;
+    marketDataLine = hasMarketData
+      ? `Yes: ${(yesProb * 100).toFixed(1)}% | No: ${(noProb * 100).toFixed(1)}% | Leading outcome: ${leadOutcome} at ${(leadProb * 100).toFixed(1)}% | Volume: $${market.volume.toLocaleString()} | Platform: ${market.platform}`
+      : `Platform: ${market.platform} (No market data available — analyze based on the event itself)`;
+    marketTypeInstruction = `This is a BINARY (Yes/No) market. Your summary MUST cover BOTH sides: explain the case for Yes AND the case for No, then explain which side the market favors and why.`;
+  }
+
   const statsLine = [
     market.endDate ? `Resolves: ${market.endDate}` : '',
     hasMarketData && market.priceChange24h ? `24h: ${market.priceChange24h > 0 ? '+' : ''}${market.priceChange24h}%` : '',
@@ -75,7 +99,9 @@ Today's date: ${today}${confidenceWarning}
 
 Market: ${market.title}
 ${marketDataLine}
-${statsLine}${newsBlock}${cryptoBlock}
+${statsLine}
+
+${marketTypeInstruction}${newsBlock}${cryptoBlock}
 
 JSON response:
 {"summary":"2-3 sentences analyzing this market/event. ${hasMarketData ? 'Explain WHY probability is here.' : 'Analyze the likely outcome based on available information.'} Do not assume or fabricate political outcomes.","keyFactors":[{"name":"Factor","sentiment":"bullish|bearish|neutral","detail":"One sentence"}],"historicalBaseRate":"One sentence on precedent.","upcomingCatalysts":["FUTURE event/date after ${today} that could move this market"]}
@@ -94,7 +120,7 @@ JSON response:
         ],
         generationConfig: {
           temperature: 0.7,
-          maxOutputTokens: 800,
+          maxOutputTokens: 1200,
           responseMimeType: 'application/json',
           thinkingConfig: { thinkingBudget: 0 },
         },

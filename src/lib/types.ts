@@ -13,6 +13,7 @@ export interface Market {
   imageUrl?: string;
   url?: string;
   conditionId?: string;
+  outcomes?: Record<string, number>;
   createdAt?: string;
   updatedAt?: string;
 }
