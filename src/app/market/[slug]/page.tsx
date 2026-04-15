@@ -3,6 +3,7 @@ import Link from 'next/link';
 import { Metadata } from 'next';
 import { getMarket } from '@/lib/spredd';
 import MarketBriefLoader from '@/components/MarketBriefLoader';
+import PriceChart from '@/components/PriceChart';
 import {
   formatVolume,
   formatProbability,
@@ -170,6 +171,9 @@ export default async function MarketPage({ params }: PageProps) {
           </p>
         </div>
       )}
+
+      {/* Price chart for crypto/financial markets */}
+      <PriceChart title={market.title} category={market.category} />
 
       {/* AI Context Brief — loaded client-side with rate limiting */}
       <div className="mb-8">
