@@ -1179,7 +1179,7 @@ function SlideFundraise({ idx, total }) {
               display: 'flex', justifyContent: 'space-between', alignItems: 'baseline',
             }}>
               <span style={{ fontFamily: FONT_MONO, fontSize: TYPE_SCALE.small, color: C.inkDim, letterSpacing: '0.14em' }}>{k}</span>
-              <span style={{ fontFamily: FONT_MONO, fontSize: TYPE_SCALE.title, color: C.green, fontWeight: 500, letterSpacing: '-0.02em' }}>{v}</span>
+              <span style={{ fontFamily: FONT_MONO, fontSize: k === 'INSTRUMENT' ? TYPE_SCALE.subtitle : TYPE_SCALE.title, color: C.green, fontWeight: 500, letterSpacing: '-0.02em', whiteSpace: 'nowrap' }}>{v}</span>
             </div>
           ))}
         </div>

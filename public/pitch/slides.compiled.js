@@ -2405,10 +2405,11 @@ function SlideFundraise({
   }, k), /*#__PURE__*/React.createElement("span", {
     style: {
       fontFamily: FONT_MONO,
-      fontSize: TYPE_SCALE.title,
+      fontSize: k === 'INSTRUMENT' ? TYPE_SCALE.subtitle : TYPE_SCALE.title,
       color: C.green,
       fontWeight: 500,
-      letterSpacing: '-0.02em'
+      letterSpacing: '-0.02em',
+      whiteSpace: 'nowrap'
     }
   }, v)))), /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("div", {
     style: {
