@@ -48,8 +48,25 @@ function Ticker() {
   return null;
 }
 
+function useLiveClock() {
+  const [ts, setTs] = React.useState(() => formatET(new Date()));
+  React.useEffect(() => {
+    const id = setInterval(() => setTs(formatET(new Date())), 1000);
+    return () => clearInterval(id);
+  }, []);
+  return ts;
+}
+
+function formatET(d) {
+  const t = new Intl.DateTimeFormat('en-US', {
+    timeZone: 'America/New_York', hour12: false,
+    hour: '2-digit', minute: '2-digit', second: '2-digit',
+  }).format(d);
+  return `${t} ET`;
+}
+
 function StatusBar({ idx, total, section }) {
-  const ts = '08:42:11 ET';
+  const ts = useLiveClock();
   return (
     <div style={{
       position: 'absolute', bottom: 0, left: 0, right: 0, height: SPACING.chromeH,

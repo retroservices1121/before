@@ -44,12 +44,30 @@ const FONT_SANS = `'IBM Plex Sans', ui-sans-serif, system-ui, -apple-system, san
 function Ticker() {
   return null;
 }
+function formatET(d) {
+  const t = new Intl.DateTimeFormat('en-US', {
+    timeZone: 'America/New_York',
+    hour12: false,
+    hour: '2-digit',
+    minute: '2-digit',
+    second: '2-digit'
+  }).format(d);
+  return `${t} ET`;
+}
+function useLiveClock() {
+  const [ts, setTs] = React.useState(() => formatET(new Date()));
+  React.useEffect(() => {
+    const id = setInterval(() => setTs(formatET(new Date())), 1000);
+    return () => clearInterval(id);
+  }, []);
+  return ts;
+}
 function StatusBar({
   idx,
   total,
   section
 }) {
-  const ts = '08:42:11 ET';
+  const ts = useLiveClock();
   return /*#__PURE__*/React.createElement("div", {
     style: {
       position: 'absolute',
