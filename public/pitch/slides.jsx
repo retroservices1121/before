@@ -268,7 +268,7 @@ function SlideProblem({ idx, total }) {
         <div>
           <div style={{ fontSize: TYPE_SCALE.body, lineHeight: 1.45, color: C.ink, maxWidth: 720 }}>
             Prediction markets crossed <span style={{ color: C.green, fontFamily: FONT_MONO }}>$21B</span> in monthly volume.
-            Polymarket, Kalshi, Limitless and dozens of new platforms are onboarding millions of traders —
+            Polymarket, Kalshi, Limitless and dozens of new platforms are onboarding millions of traders,
             all staring at probabilities with <span style={{ color: C.amber }}>zero context</span>.
           </div>
           <div style={{ marginTop: 48, display: 'flex', flexDirection: 'column', gap: 20 }}>
@@ -313,13 +313,6 @@ function SlideProblem({ idx, total }) {
           </div>
         </div>
       </div>
-      <div style={{
-        marginTop: 32, padding: '24px 32px', borderLeft: `3px solid ${C.green}`,
-        background: 'rgba(0,255,156,0.05)', fontSize: TYPE_SCALE.subtitle,
-        fontFamily: FONT_SANS, color: C.ink, letterSpacing: '-0.01em',
-      }}>
-        There is no Bloomberg terminal for prediction markets.
-      </div>
     </Frame>
   );
 }
@@ -330,7 +323,7 @@ function SlideProblem({ idx, total }) {
 function SlideSolution({ idx, total }) {
   const items = [
     ['WHY', 'the probability is where it is'],
-    ['WHAT FACTORS', 'are driving movement — bullish, bearish, neutral'],
+    ['WHAT FACTORS', 'are driving movement: bullish, bearish, neutral'],
     ['BASE RATE', 'historical frequency for similar events'],
     ['CATALYSTS', 'upcoming events that could move the market'],
   ];
@@ -399,7 +392,7 @@ function BriefMock() {
           <div style={{ color: C.inkDim, letterSpacing: '0.12em', fontSize: 14 }}>// WHY</div>
           <div style={{ color: C.ink, marginTop: 6 }}>
             Probability fell 4.2pts after CPI print came in hot at 3.4% YoY.
-            Powell's Mar 20 remarks emphasized "patience" — market priced in delay.
+            Powell's Mar 20 remarks emphasized "patience". Market priced in delay.
           </div>
         </div>
         <div style={{ marginTop: 20 }}>
@@ -460,11 +453,8 @@ function SlideHow({ idx, total }) {
             <div style={{ fontFamily: FONT_MONO, fontSize: TYPE_SCALE.tick, color: C.green, letterSpacing: '0.2em' }}>
               AI SYNTHESIS
             </div>
-            <div style={{ fontFamily: FONT_SANS, fontSize: TYPE_SCALE.title, fontWeight: 500, color: C.ink, margin: '18px 0', letterSpacing: '-0.02em' }}>
+            <div style={{ fontFamily: FONT_SANS, fontSize: TYPE_SCALE.title, fontWeight: 500, color: C.ink, margin: '18px 0 0 0', letterSpacing: '-0.02em' }}>
               Gemini
-            </div>
-            <div style={{ fontFamily: FONT_MONO, fontSize: TYPE_SCALE.tick, color: C.inkDim, letterSpacing: '0.14em' }}>
-              &lt; $0.01 / brief
             </div>
           </div>
           <div style={{ display: 'flex', justifyContent: 'center', color: C.green, fontFamily: FONT_MONO, fontSize: 36 }}>→</div>
@@ -506,8 +496,8 @@ function SlideHow({ idx, total }) {
 function SlideProduct({ idx, total }) {
   const surfaces = [
     {
-      k: 'CHROME EXTENSION', t: 'Briefs injected into 8 platforms',
-      d: 'Appears natively inside Polymarket, Kalshi, Limitless + 5 more. Primary acquisition surface.',
+      k: 'CHROME EXTENSION', t: 'Briefs injected into 6 platforms',
+      d: 'Appears natively inside Polymarket, Kalshi, Limitless + 3 more. Primary acquisition surface.',
       s: 'LIVE · v1.3.0', tone: 'green',
       mock: 'ext',
     },
@@ -525,7 +515,7 @@ function SlideProduct({ idx, total }) {
     },
     {
       k: 'BASE MINI APP', t: 'Wallet-native · USDC credits',
-      d: 'Future channel for Base App and Farcaster. Built, gated to roadmap until extension + embed scale.',
+      d: 'Future channel for Base App and Farcaster. Built, gated to roadmap until extension + embed scale. Pricing TBD.',
       s: 'ROADMAP', tone: 'amber',
       mock: 'mini',
     },
@@ -649,7 +639,7 @@ function SlideDistribution({ idx, total }) {
             Chrome Extension
           </div>
           <div style={{ fontFamily: FONT_MONO, fontSize: TYPE_SCALE.micro, color: C.inkDim, marginTop: 10, letterSpacing: '0.06em' }}>
-            LIVE ON 8 PLATFORMS
+            LIVE ON 6 PLATFORMS
           </div>
           <div style={{ marginTop: 28, display: 'flex', flexDirection: 'column', gap: 10, flex: 1 }}>
             {[
@@ -658,8 +648,6 @@ function SlideDistribution({ idx, total }) {
               ['Limitless', 'BIG-3'],
               ['DFlow', 'SOL'],
               ['Alpha Arcade', '#3 VOL'],
-              ['Matchr', ''],
-              ['Polynance', ''],
               ['MetaMask PM', 'NEW'],
             ].map(([p, t], i) => (
               <div key={i} style={{
@@ -696,7 +684,7 @@ function SlideDistribution({ idx, total }) {
           </div>
           <div style={{ marginTop: 28, fontSize: TYPE_SCALE.small, color: C.inkDim, lineHeight: 1.45, flex: 1 }}>
             Partner gets the widget free. <span style={{ color: C.ink }}>Their users pay.</span>
-            &nbsp;Every signup carries a <span style={{ color: C.green }}>ref_platform</span> tag — attribution flows straight to rev share.
+            &nbsp;Every signup carries a <span style={{ color: C.green }}>ref_platform</span> tag, so attribution flows straight to rev share.
           </div>
         </div>
 
@@ -714,8 +702,8 @@ function SlideDistribution({ idx, total }) {
           <div style={{ marginTop: 28, display: 'flex', flexDirection: 'column', gap: 18, flex: 1 }}>
             {[
               ['10', 'PM mini apps on Base'],
-              ['0', 'Intelligence layers — until now'],
-              ['$0.99', '10-credit pack · USDC on Base'],
+              ['0', 'Intelligence layers, until now'],
+              ['TBD', 'USDC credit pricing on Base'],
             ].map(([n, l], i) => (
               <div key={i} style={{ display: 'grid', gridTemplateColumns: '110px 1fr', alignItems: 'baseline', gap: 16 }}>
                 <div style={{ fontFamily: FONT_MONO, fontSize: 44, color: C.green, fontWeight: 500 }}>{n}</div>
@@ -740,10 +728,10 @@ function SlideDistribution({ idx, total }) {
 // ─────────────────────────────────────────────────────────────
 function SlideModel({ idx, total }) {
   const rows = [
-    ['SUBSCRIPTIONS', 'Extension + Web', 'Stripe SaaS', 'Lite $4.99/mo · Pro $9.99/mo'],
-    ['REV SHARE', 'Partner Embeds', 'ref_platform attribution', '% of partner-sourced subs'],
+    ['CREDITS', 'Extension + Web', 'Pay-per-brief credits', 'Pricing TBD'],
+    ['REV SHARE', 'Partner Embeds', 'ref_platform attribution', '% of partner-sourced credits'],
     ['DEEP-LINK', 'Trading volume', 'Referral attribution', '% of volume routed to platforms'],
-    ['USDC CREDITS · ROADMAP', 'Base Mini App', 'On-chain USDC', '10 / $0.99 · 50 / $3.99'],
+    ['USDC CREDITS · ROADMAP', 'Base Mini App', 'On-chain USDC', 'Pricing TBD'],
   ];
   return (
     <Frame idx={idx} total={total} section="business-model">
@@ -963,7 +951,7 @@ function SlideCompetition({ idx, total }) {
 // ─────────────────────────────────────────────────────────────
 function SlideTraction({ idx, total }) {
   const built = [
-    'Chrome extension v1.3.0 · live on 8 platforms · primary acquisition surface',
+    'Chrome extension v1.3.0 · live on 6 platforms · primary acquisition surface',
     'Embeddable widget · ref_platform attribution + inline auth · partner rev share live',
     'Working web app at b4enews.com',
     'Direct API integrations · Polymarket · Kalshi · Limitless',
@@ -973,13 +961,11 @@ function SlideTraction({ idx, total }) {
   ];
   const partners = [
     ['Inflectiv', 'Data marketplace partnership · inbound', 'green'],
-    ['Hyperliquid Builders Program', '$50–100K grant · applied', 'amber'],
     ['Base Ecosystem', 'Outreach · David Tso · Base Batches', 'amber'],
-    ['Ex-Coinbase engineer', 'Advisor · committed', 'green'],
   ];
   return (
     <Frame idx={idx} total={total} section="traction">
-      <SlideHeader number={10} kicker="TRACTION" title="Built — not a pitch deck." />
+      <SlideHeader number={10} kicker="TRACTION" title="Built. Not a pitch deck." />
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 56, flex: 1 }}>
         <div>
           <div style={{ fontFamily: FONT_MONO, fontSize: TYPE_SCALE.tick, color: C.green, letterSpacing: '0.2em' }}>
@@ -1073,7 +1059,7 @@ function SlideTeam({ idx, total }) {
               {i === 0 ? (
                 <>
                   <span style={{ color: C.green }}>// TODO</span><br />
-                  Drop founder bio here — prior roles, shipped products,<br />
+                  Drop founder bio here. Prior roles, shipped products,<br />
                   domain expertise, why you're building this.
                 </>
               ) : (
@@ -1092,51 +1078,13 @@ function SlideTeam({ idx, total }) {
 }
 
 // ─────────────────────────────────────────────────────────────
-// 12 — WHY NOW
-// ─────────────────────────────────────────────────────────────
-function SlideWhyNow({ idx, total }) {
-  const points = [
-    ['01', 'VOLUME', 'Monthly volume is 17× what it was 18 months ago — and accelerating.'],
-    ['02', 'REGULATION', 'Kalshi CFTC approved. Polymarket with post-election momentum.'],
-    ['03', 'DISTRIBUTION', 'Base App, MetaMask, Binance Wallet all adding prediction markets.'],
-    ['04', 'MONETIZATION', 'x402 just launched — Coinbase micropayments are a new primitive.'],
-    ['05', 'AI COSTS', 'Gemini Flash generates briefs for < $0.01 each.'],
-  ];
-  return (
-    <Frame idx={idx} total={total} section="why-now">
-      <SlideHeader number={12} kicker="WHY NOW" title="Five conditions, all true for the first time." />
-      <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: 0 }}>
-        {points.map(([n, k, v], i) => (
-          <div key={i} style={{
-            display: 'grid', gridTemplateColumns: '80px 260px 1fr',
-            alignItems: 'baseline', gap: 40,
-            padding: '28px 0', borderTop: `1px solid ${C.border}`,
-            ...(i === points.length - 1 ? { borderBottom: `1px solid ${C.border}` } : {}),
-          }}>
-            <div style={{ fontFamily: FONT_MONO, fontSize: TYPE_SCALE.small, color: C.green, letterSpacing: '0.12em' }}>{n}</div>
-            <div style={{ fontFamily: FONT_MONO, fontSize: TYPE_SCALE.small, color: C.ink, letterSpacing: '0.08em' }}>{k}</div>
-            <div style={{ fontSize: TYPE_SCALE.small, color: C.inkDim, lineHeight: 1.4 }}>{v}</div>
-          </div>
-        ))}
-      </div>
-      <div style={{
-        marginTop: 32, fontSize: TYPE_SCALE.subtitle, color: C.ink,
-        letterSpacing: '-0.01em', maxWidth: 1200,
-      }}>
-        The intelligence layer needs to exist. <span style={{ color: C.green }}>The question is who builds it.</span>
-      </div>
-    </Frame>
-  );
-}
-
-// ─────────────────────────────────────────────────────────────
 // 13 — USE OF FUNDS
 // ─────────────────────────────────────────────────────────────
 function SlideFunds({ idx, total }) {
   const rows = [
-    { k: 'ENGINEERING', pct: 40, amt: '$800K', note: '2 engineers · scale pipeline · alerts · watchlist' },
+    { k: 'INFRA + API', pct: 40, amt: '$800K', note: 'Gemini · Railway/Vercel · TinyFish crawl · DB scaling' },
     { k: 'GROWTH', pct: 25, amt: '$500K', note: 'Partner onboarding · Chrome Web Store · Base grants · content' },
-    { k: 'INFRA + API', pct: 15, amt: '$300K', note: 'Gemini · Railway/Vercel · TinyFish crawl · DB scaling' },
+    { k: 'ENGINEERING', pct: 15, amt: '$300K', note: '2 engineers · scale pipeline · alerts · watchlist' },
     { k: 'OPS + LEGAL', pct: 10, amt: '$200K', note: 'Operations · legal · compliance' },
     { k: 'RESERVE', pct: 10, amt: '$200K', note: 'Runway buffer' },
   ];
@@ -1224,15 +1172,14 @@ function SlideFundraise({ idx, total }) {
   ];
   const why = [
     'Working product across 4 surfaces (web · extension · embed · mini app)',
-    '8 platform integrations built and tested',
-    'Novel revenue model — USDC credits + SaaS + rev share',
-    'Ex-Coinbase advisor on cap table',
+    '6 platform integrations built and tested',
+    'Novel revenue model: USDC credits, partner rev share, deep-link referrals',
     '$21B+ and growing TAM · no dominant intelligence player',
-    'Non-dilutive capital pipeline · Hyperliquid grant · Base ecosystem',
+    'Non-dilutive capital pipeline · Base ecosystem outreach in motion',
   ];
   return (
     <Frame idx={idx} total={total} section="fundraise">
-      <SlideHeader number={14} kicker="FUNDRAISE" title="Pre-seed terms." />
+      <SlideHeader number={12} kicker="FUNDRAISE" title="Pre-seed terms." />
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1.1fr', gap: 72, flex: 1 }}>
         <div style={{ display: 'flex', flexDirection: 'column', gap: 2, background: C.border }}>
           {terms.map(([k, v], i) => (
@@ -1267,78 +1214,6 @@ function SlideFundraise({ idx, total }) {
 }
 
 // ─────────────────────────────────────────────────────────────
-// 15 — THE ASK
-// ─────────────────────────────────────────────────────────────
-function SlideAsk({ idx, total }) {
-  const milestones = [
-    ['10,000+', 'MONTHLY ACTIVE USERS'],
-    ['4', 'REVENUE CHANNELS LIVE'],
-    ['20+', 'PLATFORM INTEGRATIONS'],
-    ['A', 'SERIES A READY'],
-  ];
-  return (
-    <Frame idx={idx} total={total} section="ask" pad={false}>
-      <div style={{
-        position: 'absolute', inset: `${SPACING.tickerH}px 0 ${SPACING.chromeH}px 0`,
-        padding: `${SPACING.paddingTop - SPACING.tickerH}px ${SPACING.paddingX}px ${SPACING.paddingBottom - SPACING.chromeH}px`,
-        display: 'flex', flexDirection: 'column', justifyContent: 'space-between',
-      }}>
-        <div>
-          <div style={{ fontFamily: FONT_MONO, fontSize: TYPE_SCALE.micro, color: C.green, letterSpacing: '0.18em' }}>
-            [15] THE ASK
-          </div>
-          <div style={{
-            marginTop: 40, fontFamily: FONT_SANS, fontSize: 92, fontWeight: 500,
-            color: C.ink, lineHeight: 1.02, letterSpacing: '-0.03em', maxWidth: 1400,
-          }}>
-            Every trader deserves context, <br />
-            <span style={{ color: C.green }}>not just a number.</span>
-          </div>
-          <div style={{
-            marginTop: 36, fontSize: TYPE_SCALE.subtitle, color: C.inkDim, maxWidth: 1100, lineHeight: 1.3,
-          }}>
-            We're building the intelligence layer that prediction markets need to go mainstream.
-          </div>
-        </div>
-
-        <div>
-          <div style={{ fontFamily: FONT_MONO, fontSize: TYPE_SCALE.tick, color: C.inkDim, letterSpacing: '0.2em' }}>
-            $2M GETS US TO
-          </div>
-          <div style={{ marginTop: 20, display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 2, background: C.border }}>
-            {milestones.map(([v, l], i) => (
-              <div key={i} style={{ background: C.bgPanel, padding: '32px 28px' }}>
-                <div style={{ fontFamily: FONT_MONO, fontSize: 72, color: C.green, fontWeight: 500, letterSpacing: '-0.03em', lineHeight: 1 }}>{v}</div>
-                <div style={{ fontFamily: FONT_MONO, fontSize: TYPE_SCALE.tick, color: C.inkDim, letterSpacing: '0.14em', marginTop: 14 }}>{l}</div>
-              </div>
-            ))}
-          </div>
-          <div style={{
-            marginTop: 40, display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end',
-            borderTop: `1px solid ${C.border}`, paddingTop: 32,
-          }}>
-            <div>
-              <div style={{ fontFamily: FONT_SANS, fontSize: 96, fontWeight: 500, color: C.ink, letterSpacing: '-0.04em', lineHeight: 0.9 }}>
-                before<span style={{ color: C.green }}>.</span>
-              </div>
-              <div style={{ fontFamily: FONT_MONO, fontSize: TYPE_SCALE.small, color: C.green, marginTop: 14, letterSpacing: '-0.01em' }}>
-                know before it matters.
-              </div>
-            </div>
-            <div style={{ textAlign: 'right', fontFamily: FONT_MONO, fontSize: TYPE_SCALE.small, color: C.inkDim, lineHeight: 1.6, letterSpacing: '0.06em' }}>
-              <div style={{ color: C.ink }}>b4enews.com</div>
-              <div>@b4e</div>
-            </div>
-          </div>
-        </div>
-      </div>
-      <Ticker />
-      <StatusBar idx={idx} total={total} section="ask" />
-    </Frame>
-  );
-}
-
-// ─────────────────────────────────────────────────────────────
 // REGISTRY
 // ─────────────────────────────────────────────────────────────
 const SLIDES = [
@@ -1353,15 +1228,13 @@ const SLIDES = [
   { label: '09 Competition', Comp: SlideCompetition },
   { label: '10 Traction', Comp: SlideTraction },
   { label: '11 Team', Comp: SlideTeam },
-  { label: '12 Why Now', Comp: SlideWhyNow },
+  { label: '12 Fundraise', Comp: SlideFundraise },
   { label: '13 Use of Funds', Comp: SlideFunds },
-  { label: '14 Fundraise', Comp: SlideFundraise },
-  { label: '15 The Ask', Comp: SlideAsk },
 ];
 
 Object.assign(window, {
   SLIDES, SlideCover, SlideProblem, SlideSolution, SlideHow, SlideProduct,
   SlideDistribution, SlideModel, SlideMarket, SlideCompetition, SlideTraction,
-  SlideTeam, SlideWhyNow, SlideFunds, SlideFundraise, SlideAsk,
+  SlideTeam, SlideFunds, SlideFundraise,
   B4E_C: C, B4E_TYPE_SCALE: TYPE_SCALE, B4E_SPACING: SPACING,
 });

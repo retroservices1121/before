@@ -440,7 +440,7 @@ function SlideProblem({
       color: C.green,
       fontFamily: FONT_MONO
     }
-  }, "$21B"), " in monthly volume. Polymarket, Kalshi, Limitless and dozens of new platforms are onboarding millions of traders \u2014 all staring at probabilities with ", /*#__PURE__*/React.createElement("span", {
+  }, "$21B"), " in monthly volume. Polymarket, Kalshi, Limitless and dozens of new platforms are onboarding millions of traders, all staring at probabilities with ", /*#__PURE__*/React.createElement("span", {
     style: {
       color: C.amber
     }
@@ -529,18 +529,7 @@ function SlideProblem({
     style: {
       animation: 'blink 1s step-end infinite'
     }
-  }, "\u25AE")))), /*#__PURE__*/React.createElement("div", {
-    style: {
-      marginTop: 32,
-      padding: '24px 32px',
-      borderLeft: `3px solid ${C.green}`,
-      background: 'rgba(0,255,156,0.05)',
-      fontSize: TYPE_SCALE.subtitle,
-      fontFamily: FONT_SANS,
-      color: C.ink,
-      letterSpacing: '-0.01em'
-    }
-  }, "There is no Bloomberg terminal for prediction markets."));
+  }, "\u25AE")))));
 }
 
 // ─────────────────────────────────────────────────────────────
@@ -550,7 +539,7 @@ function SlideSolution({
   idx,
   total
 }) {
-  const items = [['WHY', 'the probability is where it is'], ['WHAT FACTORS', 'are driving movement — bullish, bearish, neutral'], ['BASE RATE', 'historical frequency for similar events'], ['CATALYSTS', 'upcoming events that could move the market']];
+  const items = [['WHY', 'the probability is where it is'], ['WHAT FACTORS', 'are driving movement: bullish, bearish, neutral'], ['BASE RATE', 'historical frequency for similar events'], ['CATALYSTS', 'upcoming events that could move the market']];
   return /*#__PURE__*/React.createElement(Frame, {
     idx: idx,
     total: total,
@@ -705,7 +694,7 @@ function BriefMock() {
       color: C.ink,
       marginTop: 6
     }
-  }, "Probability fell 4.2pts after CPI print came in hot at 3.4% YoY. Powell's Mar 20 remarks emphasized \"patience\" \u2014 market priced in delay.")), /*#__PURE__*/React.createElement("div", {
+  }, "Probability fell 4.2pts after CPI print came in hot at 3.4% YoY. Powell's Mar 20 remarks emphasized \"patience\". Market priced in delay.")), /*#__PURE__*/React.createElement("div", {
     style: {
       marginTop: 20
     }
@@ -850,14 +839,7 @@ function SlideHow({
       margin: '18px 0',
       letterSpacing: '-0.02em'
     }
-  }, "Gemini"), /*#__PURE__*/React.createElement("div", {
-    style: {
-      fontFamily: FONT_MONO,
-      fontSize: TYPE_SCALE.tick,
-      color: C.inkDim,
-      letterSpacing: '0.14em'
-    }
-  }, "< $0.01 / brief")), /*#__PURE__*/React.createElement("div", {
+  }, "Gemini")), /*#__PURE__*/React.createElement("div", {
     style: {
       display: 'flex',
       justifyContent: 'center',
@@ -946,8 +928,8 @@ function SlideProduct({
 }) {
   const surfaces = [{
     k: 'CHROME EXTENSION',
-    t: 'Briefs injected into 8 platforms',
-    d: 'Appears natively inside Polymarket, Kalshi, Limitless + 5 more. Primary acquisition surface.',
+    t: 'Briefs injected into 6 platforms',
+    d: 'Appears natively inside Polymarket, Kalshi, Limitless + 3 more. Primary acquisition surface.',
     s: 'LIVE · v1.3.0',
     tone: 'green',
     mock: 'ext'
@@ -968,7 +950,7 @@ function SlideProduct({
   }, {
     k: 'BASE MINI APP',
     t: 'Wallet-native · USDC credits',
-    d: 'Future channel for Base App and Farcaster. Built, gated to roadmap until extension + embed scale.',
+    d: 'Future channel for Base App and Farcaster. Built, gated to roadmap until extension + embed scale. Pricing TBD.',
     s: 'ROADMAP',
     tone: 'amber',
     mock: 'mini'
@@ -1335,7 +1317,7 @@ function SlideDistribution({
       marginTop: 10,
       letterSpacing: '0.06em'
     }
-  }, "LIVE ON 8 PLATFORMS"), /*#__PURE__*/React.createElement("div", {
+  }, "LIVE ON 6 PLATFORMS"), /*#__PURE__*/React.createElement("div", {
     style: {
       marginTop: 28,
       display: 'flex',
@@ -1343,7 +1325,7 @@ function SlideDistribution({
       gap: 10,
       flex: 1
     }
-  }, [['Polymarket', 'BIG-3'], ['Kalshi', 'BIG-3'], ['Limitless', 'BIG-3'], ['DFlow', 'SOL'], ['Alpha Arcade', '#3 VOL'], ['Matchr', ''], ['Polynance', ''], ['MetaMask PM', 'NEW']].map(([p, t], i) => /*#__PURE__*/React.createElement("div", {
+  }, [['Polymarket', 'BIG-3'], ['Kalshi', 'BIG-3'], ['Limitless', 'BIG-3'], ['DFlow', 'SOL'], ['Alpha Arcade', '#3 VOL'], ['MetaMask PM', 'NEW']].map(([p, t], i) => /*#__PURE__*/React.createElement("div", {
     key: i,
     style: {
       display: 'flex',
@@ -1435,7 +1417,7 @@ function SlideDistribution({
     style: {
       color: C.green
     }
-  }, "ref_platform"), " tag — attribution flows straight to rev share.")), /*#__PURE__*/React.createElement("div", {
+  }, "ref_platform"), " tag, so attribution flows straight to rev share.")), /*#__PURE__*/React.createElement("div", {
     style: {
       background: C.bgPanel,
       padding: 36,
@@ -1473,7 +1455,7 @@ function SlideDistribution({
       gap: 18,
       flex: 1
     }
-  }, [['10', 'PM mini apps on Base'], ['0', 'Intelligence layers — until now'], ['$0.99', '10-credit pack · USDC on Base']].map(([n, l], i) => /*#__PURE__*/React.createElement("div", {
+  }, [['10', 'PM mini apps on Base'], ['0', 'Intelligence layers, until now'], ['TBD', 'USDC credit pricing on Base']].map(([n, l], i) => /*#__PURE__*/React.createElement("div", {
     key: i,
     style: {
       display: 'grid',
@@ -1513,7 +1495,7 @@ function SlideModel({
   idx,
   total
 }) {
-  const rows = [['SUBSCRIPTIONS', 'Extension + Web', 'Stripe SaaS', 'Lite $4.99/mo · Pro $9.99/mo'], ['REV SHARE', 'Partner Embeds', 'ref_platform attribution', '% of partner-sourced subs'], ['DEEP-LINK', 'Trading volume', 'Referral attribution', '% of volume routed to platforms'], ['USDC CREDITS · ROADMAP', 'Base Mini App', 'On-chain USDC', '10 / $0.99 · 50 / $3.99']];
+  const rows = [['CREDITS', 'Extension + Web', 'Pay-per-brief credits', 'Pricing TBD'], ['REV SHARE', 'Partner Embeds', 'ref_platform attribution', '% of partner-sourced credits'], ['DEEP-LINK', 'Trading volume', 'Referral attribution', '% of volume routed to platforms'], ['USDC CREDITS · ROADMAP', 'Base Mini App', 'On-chain USDC', 'Pricing TBD']];
   return /*#__PURE__*/React.createElement(Frame, {
     idx: idx,
     total: total,
@@ -1940,8 +1922,8 @@ function SlideTraction({
   idx,
   total
 }) {
-  const built = ['Chrome extension v1.3.0 · live on 8 platforms · primary acquisition surface', 'Embeddable widget · ref_platform attribution + inline auth · partner rev share live', 'Working web app at b4enews.com', 'Direct API integrations · Polymarket · Kalshi · Limitless', 'Auth · Stripe · rate limiting · caching', 'GitBook docs for partner onboarding', 'Base mini app · built, gated to roadmap until ext + embed scale'];
-  const partners = [['Inflectiv', 'Data marketplace partnership · inbound', 'green'], ['Hyperliquid Builders Program', '$50–100K grant · applied', 'amber'], ['Base Ecosystem', 'Outreach · David Tso · Base Batches', 'amber'], ['Ex-Coinbase engineer', 'Advisor · committed', 'green']];
+  const built = ['Chrome extension v1.3.0 · live on 6 platforms · primary acquisition surface', 'Embeddable widget · ref_platform attribution + inline auth · partner rev share live', 'Working web app at b4enews.com', 'Direct API integrations · Polymarket · Kalshi · Limitless', 'Auth · Stripe · rate limiting · caching', 'GitBook docs for partner onboarding', 'Base mini app · built, gated to roadmap until ext + embed scale'];
+  const partners = [['Inflectiv', 'Data marketplace partnership · inbound', 'green'], ['Base Ecosystem', 'Outreach · David Tso · Base Batches', 'amber']];
   return /*#__PURE__*/React.createElement(Frame, {
     idx: idx,
     total: total,
@@ -1949,7 +1931,7 @@ function SlideTraction({
   }, /*#__PURE__*/React.createElement(SlideHeader, {
     number: 10,
     kicker: "TRACTION",
-    title: "Built \u2014 not a pitch deck."
+    title: "Built. Not a pitch deck."
   }), /*#__PURE__*/React.createElement("div", {
     style: {
       display: 'grid',
@@ -2144,82 +2126,11 @@ function SlideTeam({
     style: {
       color: C.green
     }
-  }, "// TODO"), /*#__PURE__*/React.createElement("br", null), "Drop founder bio here \u2014 prior roles, shipped products,", /*#__PURE__*/React.createElement("br", null), "domain expertise, why you're building this.") : /*#__PURE__*/React.createElement(React.Fragment, null, /*#__PURE__*/React.createElement("span", {
+  }, "// TODO"), /*#__PURE__*/React.createElement("br", null), "Drop founder bio here. Prior roles, shipped products,", /*#__PURE__*/React.createElement("br", null), "domain expertise, why you're building this.") : /*#__PURE__*/React.createElement(React.Fragment, null, /*#__PURE__*/React.createElement("span", {
     style: {
       color: C.green
     }
   }, "// ADVISOR"), /*#__PURE__*/React.createElement("br", null), "Base ecosystem access \xB7 technical credibility \xB7", /*#__PURE__*/React.createElement("br", null), "investor introductions."))))));
-}
-
-// ─────────────────────────────────────────────────────────────
-// 12 — WHY NOW
-// ─────────────────────────────────────────────────────────────
-function SlideWhyNow({
-  idx,
-  total
-}) {
-  const points = [['01', 'VOLUME', 'Monthly volume is 17× what it was 18 months ago — and accelerating.'], ['02', 'REGULATION', 'Kalshi CFTC approved. Polymarket with post-election momentum.'], ['03', 'DISTRIBUTION', 'Base App, MetaMask, Binance Wallet all adding prediction markets.'], ['04', 'MONETIZATION', 'x402 just launched — Coinbase micropayments are a new primitive.'], ['05', 'AI COSTS', 'Gemini Flash generates briefs for < $0.01 each.']];
-  return /*#__PURE__*/React.createElement(Frame, {
-    idx: idx,
-    total: total,
-    section: "why-now"
-  }, /*#__PURE__*/React.createElement(SlideHeader, {
-    number: 12,
-    kicker: "WHY NOW",
-    title: "Five conditions, all true for the first time."
-  }), /*#__PURE__*/React.createElement("div", {
-    style: {
-      flex: 1,
-      display: 'flex',
-      flexDirection: 'column',
-      gap: 0
-    }
-  }, points.map(([n, k, v], i) => /*#__PURE__*/React.createElement("div", {
-    key: i,
-    style: {
-      display: 'grid',
-      gridTemplateColumns: '80px 260px 1fr',
-      alignItems: 'baseline',
-      gap: 40,
-      padding: '28px 0',
-      borderTop: `1px solid ${C.border}`,
-      ...(i === points.length - 1 ? {
-        borderBottom: `1px solid ${C.border}`
-      } : {})
-    }
-  }, /*#__PURE__*/React.createElement("div", {
-    style: {
-      fontFamily: FONT_MONO,
-      fontSize: TYPE_SCALE.small,
-      color: C.green,
-      letterSpacing: '0.12em'
-    }
-  }, n), /*#__PURE__*/React.createElement("div", {
-    style: {
-      fontFamily: FONT_MONO,
-      fontSize: TYPE_SCALE.small,
-      color: C.ink,
-      letterSpacing: '0.08em'
-    }
-  }, k), /*#__PURE__*/React.createElement("div", {
-    style: {
-      fontSize: TYPE_SCALE.small,
-      color: C.inkDim,
-      lineHeight: 1.4
-    }
-  }, v)))), /*#__PURE__*/React.createElement("div", {
-    style: {
-      marginTop: 32,
-      fontSize: TYPE_SCALE.subtitle,
-      color: C.ink,
-      letterSpacing: '-0.01em',
-      maxWidth: 1200
-    }
-  }, "The intelligence layer needs to exist. ", /*#__PURE__*/React.createElement("span", {
-    style: {
-      color: C.green
-    }
-  }, "The question is who builds it.")));
 }
 
 // ─────────────────────────────────────────────────────────────
@@ -2230,20 +2141,20 @@ function SlideFunds({
   total
 }) {
   const rows = [{
-    k: 'ENGINEERING',
+    k: 'INFRA + API',
     pct: 40,
     amt: '$800K',
-    note: '2 engineers · scale pipeline · alerts · watchlist'
+    note: 'Gemini · Railway/Vercel · TinyFish crawl · DB scaling'
   }, {
     k: 'GROWTH',
     pct: 25,
     amt: '$500K',
     note: 'Partner onboarding · Chrome Web Store · Base grants · content'
   }, {
-    k: 'INFRA + API',
+    k: 'ENGINEERING',
     pct: 15,
     amt: '$300K',
-    note: 'Gemini · Railway/Vercel · TinyFish crawl · DB scaling'
+    note: '2 engineers · scale pipeline · alerts · watchlist'
   }, {
     k: 'OPS + LEGAL',
     pct: 10,
@@ -2446,13 +2357,13 @@ function SlideFundraise({
   total
 }) {
   const terms = [['RAISING', '$2,000,000'], ['PRE-MONEY', '$8,000,000'], ['INSTRUMENT', 'SAFE (Post-Money)'], ['DILUTION', '20%']];
-  const why = ['Working product across 4 surfaces (web · extension · embed · mini app)', '8 platform integrations built and tested', 'Novel revenue model — USDC credits + SaaS + rev share', 'Ex-Coinbase advisor on cap table', '$21B+ and growing TAM · no dominant intelligence player', 'Non-dilutive capital pipeline · Hyperliquid grant · Base ecosystem'];
+  const why = ['Working product across 4 surfaces (web · extension · embed · mini app)', '6 platform integrations built and tested', 'Novel revenue model: USDC credits, partner rev share, deep-link referrals', '$21B+ and growing TAM · no dominant intelligence player', 'Non-dilutive capital pipeline · Base ecosystem outreach in motion'];
   return /*#__PURE__*/React.createElement(Frame, {
     idx: idx,
     total: total,
     section: "fundraise"
   }, /*#__PURE__*/React.createElement(SlideHeader, {
-    number: 14,
+    number: 12,
     kicker: "FUNDRAISE",
     title: "Pre-seed terms."
   }), /*#__PURE__*/React.createElement("div", {
@@ -2532,146 +2443,6 @@ function SlideFundraise({
 }
 
 // ─────────────────────────────────────────────────────────────
-// 15 — THE ASK
-// ─────────────────────────────────────────────────────────────
-function SlideAsk({
-  idx,
-  total
-}) {
-  const milestones = [['10,000+', 'MONTHLY ACTIVE USERS'], ['4', 'REVENUE CHANNELS LIVE'], ['20+', 'PLATFORM INTEGRATIONS'], ['A', 'SERIES A READY']];
-  return /*#__PURE__*/React.createElement(Frame, {
-    idx: idx,
-    total: total,
-    section: "ask",
-    pad: false
-  }, /*#__PURE__*/React.createElement("div", {
-    style: {
-      position: 'absolute',
-      inset: `${SPACING.tickerH}px 0 ${SPACING.chromeH}px 0`,
-      padding: `${SPACING.paddingTop - SPACING.tickerH}px ${SPACING.paddingX}px ${SPACING.paddingBottom - SPACING.chromeH}px`,
-      display: 'flex',
-      flexDirection: 'column',
-      justifyContent: 'space-between'
-    }
-  }, /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("div", {
-    style: {
-      fontFamily: FONT_MONO,
-      fontSize: TYPE_SCALE.micro,
-      color: C.green,
-      letterSpacing: '0.18em'
-    }
-  }, "[15] THE ASK"), /*#__PURE__*/React.createElement("div", {
-    style: {
-      marginTop: 40,
-      fontFamily: FONT_SANS,
-      fontSize: 92,
-      fontWeight: 500,
-      color: C.ink,
-      lineHeight: 1.02,
-      letterSpacing: '-0.03em',
-      maxWidth: 1400
-    }
-  }, "Every trader deserves context, ", /*#__PURE__*/React.createElement("br", null), /*#__PURE__*/React.createElement("span", {
-    style: {
-      color: C.green
-    }
-  }, "not just a number.")), /*#__PURE__*/React.createElement("div", {
-    style: {
-      marginTop: 36,
-      fontSize: TYPE_SCALE.subtitle,
-      color: C.inkDim,
-      maxWidth: 1100,
-      lineHeight: 1.3
-    }
-  }, "We're building the intelligence layer that prediction markets need to go mainstream.")), /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("div", {
-    style: {
-      fontFamily: FONT_MONO,
-      fontSize: TYPE_SCALE.tick,
-      color: C.inkDim,
-      letterSpacing: '0.2em'
-    }
-  }, "$2M GETS US TO"), /*#__PURE__*/React.createElement("div", {
-    style: {
-      marginTop: 20,
-      display: 'grid',
-      gridTemplateColumns: 'repeat(4, 1fr)',
-      gap: 2,
-      background: C.border
-    }
-  }, milestones.map(([v, l], i) => /*#__PURE__*/React.createElement("div", {
-    key: i,
-    style: {
-      background: C.bgPanel,
-      padding: '32px 28px'
-    }
-  }, /*#__PURE__*/React.createElement("div", {
-    style: {
-      fontFamily: FONT_MONO,
-      fontSize: 72,
-      color: C.green,
-      fontWeight: 500,
-      letterSpacing: '-0.03em',
-      lineHeight: 1
-    }
-  }, v), /*#__PURE__*/React.createElement("div", {
-    style: {
-      fontFamily: FONT_MONO,
-      fontSize: TYPE_SCALE.tick,
-      color: C.inkDim,
-      letterSpacing: '0.14em',
-      marginTop: 14
-    }
-  }, l)))), /*#__PURE__*/React.createElement("div", {
-    style: {
-      marginTop: 40,
-      display: 'flex',
-      justifyContent: 'space-between',
-      alignItems: 'flex-end',
-      borderTop: `1px solid ${C.border}`,
-      paddingTop: 32
-    }
-  }, /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("div", {
-    style: {
-      fontFamily: FONT_SANS,
-      fontSize: 96,
-      fontWeight: 500,
-      color: C.ink,
-      letterSpacing: '-0.04em',
-      lineHeight: 0.9
-    }
-  }, "before", /*#__PURE__*/React.createElement("span", {
-    style: {
-      color: C.green
-    }
-  }, ".")), /*#__PURE__*/React.createElement("div", {
-    style: {
-      fontFamily: FONT_MONO,
-      fontSize: TYPE_SCALE.small,
-      color: C.green,
-      marginTop: 14,
-      letterSpacing: '-0.01em'
-    }
-  }, "know before it matters.")), /*#__PURE__*/React.createElement("div", {
-    style: {
-      textAlign: 'right',
-      fontFamily: FONT_MONO,
-      fontSize: TYPE_SCALE.small,
-      color: C.inkDim,
-      lineHeight: 1.6,
-      letterSpacing: '0.06em'
-    }
-  }, /*#__PURE__*/React.createElement("div", {
-    style: {
-      color: C.ink
-    }
-  }, "b4enews.com"), /*#__PURE__*/React.createElement("div", null, "@b4e"))))), /*#__PURE__*/React.createElement(Ticker, null), /*#__PURE__*/React.createElement(StatusBar, {
-    idx: idx,
-    total: total,
-    section: "ask"
-  }));
-}
-
-// ─────────────────────────────────────────────────────────────
 // REGISTRY
 // ─────────────────────────────────────────────────────────────
 const SLIDES = [{
@@ -2708,17 +2479,11 @@ const SLIDES = [{
   label: '11 Team',
   Comp: SlideTeam
 }, {
-  label: '12 Why Now',
-  Comp: SlideWhyNow
+  label: '12 Fundraise',
+  Comp: SlideFundraise
 }, {
   label: '13 Use of Funds',
   Comp: SlideFunds
-}, {
-  label: '14 Fundraise',
-  Comp: SlideFundraise
-}, {
-  label: '15 The Ask',
-  Comp: SlideAsk
 }];
 Object.assign(window, {
   SLIDES,
@@ -2733,10 +2498,8 @@ Object.assign(window, {
   SlideCompetition,
   SlideTraction,
   SlideTeam,
-  SlideWhyNow,
   SlideFunds,
   SlideFundraise,
-  SlideAsk,
   B4E_C: C,
   B4E_TYPE_SCALE: TYPE_SCALE,
   B4E_SPACING: SPACING
