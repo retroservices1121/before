@@ -14,6 +14,10 @@ const nextConfig = {
         source: '/',
         destination: '/index.html',
       },
+      {
+        source: '/pitch',
+        destination: '/pitch/index.html',
+      },
     ];
   },
 };
