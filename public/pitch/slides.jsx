@@ -1025,53 +1025,44 @@ function SlideTraction({ idx, total }) {
 function SlideTeam({ idx, total }) {
   return (
     <Frame idx={idx} total={total} section="team">
-      <SlideHeader number={11} kicker="TEAM" title="Founders & advisors." />
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 56, flex: 1 }}>
-        {[0, 1].map(i => (
-          <div key={i} style={{
-            padding: 48, background: C.bgPanel, border: `1px solid ${C.border}`,
-            display: 'flex', flexDirection: 'column',
-          }}>
-            <div style={{ display: 'flex', gap: 28, alignItems: 'center' }}>
-              <div style={{
-                width: 120, height: 120, background: C.bg, border: `1px dashed ${C.borderStrong}`,
-                display: 'flex', alignItems: 'center', justifyContent: 'center',
-                fontFamily: FONT_MONO, fontSize: 14, color: C.inkMute, letterSpacing: '0.12em',
-              }}>
-                PHOTO
+      <SlideHeader number={11} kicker="TEAM" title="Founder." />
+      <div style={{ flex: 1, display: 'flex' }}>
+        <div style={{
+          padding: 56, background: C.bgPanel, border: `1px solid ${C.border}`,
+          display: 'grid', gridTemplateColumns: '320px 1fr', gap: 56, alignItems: 'center', flex: 1,
+        }}>
+          <img
+            src="/pitch/founder.jpg"
+            alt="Joseph Perez"
+            style={{
+              width: 320, height: 320, objectFit: 'cover',
+              border: `1px solid ${C.borderStrong}`, display: 'block',
+            }}
+          />
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 24 }}>
+            <div>
+              <div style={{ fontFamily: FONT_MONO, fontSize: TYPE_SCALE.tick, color: C.green, letterSpacing: '0.2em' }}>
+                FOUNDER · CEO
               </div>
-              <div>
-                <div style={{ fontFamily: FONT_MONO, fontSize: TYPE_SCALE.tick, color: C.green, letterSpacing: '0.18em' }}>
-                  {i === 0 ? 'FOUNDER · CEO' : 'ADVISOR'}
-                </div>
-                <div style={{
-                  fontFamily: FONT_SANS, fontSize: TYPE_SCALE.title, color: C.ink, fontWeight: 500,
-                  letterSpacing: '-0.02em', marginTop: 10,
-                }}>
-                  {i === 0 ? '[ Your Name ]' : 'Ex-Coinbase Engineer'}
-                </div>
+              <div style={{
+                fontFamily: FONT_SANS, fontSize: 72, color: C.ink, fontWeight: 500,
+                letterSpacing: '-0.02em', marginTop: 14, lineHeight: 1.05,
+              }}>
+                Joseph Perez
               </div>
             </div>
-            <div style={{
-              marginTop: 36, padding: 28, background: C.bg, border: `1px dashed ${C.borderStrong}`,
-              flex: 1, fontFamily: FONT_MONO, fontSize: TYPE_SCALE.micro, color: C.inkDim, lineHeight: 1.7,
-            }}>
-              {i === 0 ? (
-                <>
-                  <span style={{ color: C.green }}>// TODO</span><br />
-                  Drop founder bio here. Prior roles, shipped products,<br />
-                  domain expertise, why you're building this.
-                </>
-              ) : (
-                <>
-                  <span style={{ color: C.green }}>// ADVISOR</span><br />
-                  Base ecosystem access · technical credibility ·<br />
-                  investor introductions.
-                </>
-              )}
+            <div style={{ fontSize: TYPE_SCALE.small, color: C.ink, lineHeight: 1.45, maxWidth: 720 }}>
+              21-year U.S. military veteran. Background in finance, 10+ years in web3.
+              Non-tech founder building in the prediction markets space since early 2025
+              across multiple prediction platforms and infra projects.
+            </div>
+            <div style={{ display: 'flex', gap: 24, marginTop: 8, fontFamily: FONT_MONO, fontSize: TYPE_SCALE.micro, color: C.inkDim, letterSpacing: '0.06em' }}>
+              <span><span style={{ color: C.green }}>TG </span>@Game4Charity</span>
+              <span style={{ color: C.inkMute }}>│</span>
+              <span><span style={{ color: C.green }}>X </span>@jprz1321</span>
             </div>
           </div>
-        ))}
+        </div>
       </div>
     </Frame>
   );

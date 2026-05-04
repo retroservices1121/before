@@ -2057,80 +2057,86 @@ function SlideTeam({
   }, /*#__PURE__*/React.createElement(SlideHeader, {
     number: 11,
     kicker: "TEAM",
-    title: "Founders & advisors."
+    title: "Founder."
   }), /*#__PURE__*/React.createElement("div", {
     style: {
-      display: 'grid',
-      gridTemplateColumns: '1fr 1fr',
-      gap: 56,
-      flex: 1
+      flex: 1,
+      display: 'flex'
     }
-  }, [0, 1].map(i => /*#__PURE__*/React.createElement("div", {
-    key: i,
+  }, /*#__PURE__*/React.createElement("div", {
     style: {
-      padding: 48,
+      padding: 56,
       background: C.bgPanel,
       border: `1px solid ${C.border}`,
-      display: 'flex',
-      flexDirection: 'column'
-    }
-  }, /*#__PURE__*/React.createElement("div", {
-    style: {
-      display: 'flex',
-      gap: 28,
-      alignItems: 'center'
-    }
-  }, /*#__PURE__*/React.createElement("div", {
-    style: {
-      width: 120,
-      height: 120,
-      background: C.bg,
-      border: `1px dashed ${C.borderStrong}`,
-      display: 'flex',
+      display: 'grid',
+      gridTemplateColumns: '320px 1fr',
+      gap: 56,
       alignItems: 'center',
-      justifyContent: 'center',
-      fontFamily: FONT_MONO,
-      fontSize: 14,
-      color: C.inkMute,
-      letterSpacing: '0.12em'
+      flex: 1
     }
-  }, "PHOTO"), /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("div", {
+  }, /*#__PURE__*/React.createElement("img", {
+    src: "/pitch/founder.jpg",
+    alt: "Joseph Perez",
+    style: {
+      width: 320,
+      height: 320,
+      objectFit: 'cover',
+      border: `1px solid ${C.borderStrong}`,
+      display: 'block'
+    }
+  }), /*#__PURE__*/React.createElement("div", {
+    style: {
+      display: 'flex',
+      flexDirection: 'column',
+      gap: 24
+    }
+  }, /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("div", {
     style: {
       fontFamily: FONT_MONO,
       fontSize: TYPE_SCALE.tick,
       color: C.green,
-      letterSpacing: '0.18em'
+      letterSpacing: '0.2em'
     }
-  }, i === 0 ? 'FOUNDER · CEO' : 'ADVISOR'), /*#__PURE__*/React.createElement("div", {
+  }, "FOUNDER \xB7 CEO"), /*#__PURE__*/React.createElement("div", {
     style: {
       fontFamily: FONT_SANS,
-      fontSize: TYPE_SCALE.title,
+      fontSize: 72,
       color: C.ink,
       fontWeight: 500,
       letterSpacing: '-0.02em',
-      marginTop: 10
+      marginTop: 14,
+      lineHeight: 1.05
     }
-  }, i === 0 ? '[ Your Name ]' : 'Ex-Coinbase Engineer'))), /*#__PURE__*/React.createElement("div", {
+  }, "Joseph Perez")), /*#__PURE__*/React.createElement("div", {
     style: {
-      marginTop: 36,
-      padding: 28,
-      background: C.bg,
-      border: `1px dashed ${C.borderStrong}`,
-      flex: 1,
+      fontSize: TYPE_SCALE.small,
+      color: C.ink,
+      lineHeight: 1.45,
+      maxWidth: 720
+    }
+  }, "21-year U.S. military veteran. Background in finance, 10+ years in web3. Non-tech founder building in the prediction markets space since early 2025 across multiple prediction platforms and infra projects."), /*#__PURE__*/React.createElement("div", {
+    style: {
+      display: 'flex',
+      gap: 24,
+      marginTop: 8,
       fontFamily: FONT_MONO,
       fontSize: TYPE_SCALE.micro,
       color: C.inkDim,
-      lineHeight: 1.7
+      letterSpacing: '0.06em'
     }
-  }, i === 0 ? /*#__PURE__*/React.createElement(React.Fragment, null, /*#__PURE__*/React.createElement("span", {
+  }, /*#__PURE__*/React.createElement("span", null, /*#__PURE__*/React.createElement("span", {
     style: {
       color: C.green
     }
-  }, "// TODO"), /*#__PURE__*/React.createElement("br", null), "Drop founder bio here. Prior roles, shipped products,", /*#__PURE__*/React.createElement("br", null), "domain expertise, why you're building this.") : /*#__PURE__*/React.createElement(React.Fragment, null, /*#__PURE__*/React.createElement("span", {
+  }, "TG "), "@Game4Charity"), /*#__PURE__*/React.createElement("span", {
+    style: {
+      color: C.inkMute
+    }
+  }, "│"), /*#__PURE__*/React.createElement("span", null, /*#__PURE__*/React.createElement("span", {
     style: {
       color: C.green
     }
-  }, "// ADVISOR"), /*#__PURE__*/React.createElement("br", null), "Base ecosystem access \xB7 technical credibility \xB7", /*#__PURE__*/React.createElement("br", null), "investor introductions."))))));
+  }, "X "), "@jprz1321")))));
 }
 
 // ─────────────────────────────────────────────────────────────
